@@ -1,0 +1,6 @@
+[submodule "ext/prefixspan"]
+	path = libs/prefixspan
+	url = https://github.com/bolu61/prefixspan
+[submodule "libs/prefixspan"]
+	path = libs/prefixspan
+	url = https://github.com/bolu61/prefixspan
