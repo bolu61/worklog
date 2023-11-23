@@ -1,6 +1,6 @@
-from typing import Any, Iterator
-from itertools import islice
 from dataclasses import dataclass
+from itertools import islice
+from typing import Any, Iterator
 
 import jax
 import jax.numpy as jnp

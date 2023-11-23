@@ -2,13 +2,13 @@ from collections.abc import Callable
 from functools import wraps
 from itertools import islice
 from typing import Optional
-from tqdm import tqdm
 
+import flax.linen as nn
 import jax
 import jax.lax as lax
 import jax.numpy as jnp
-import flax.linen as nn
 import optax
+from tqdm import tqdm
 
 
 class InterleavedHiddenMarkovChain(nn.Module):
