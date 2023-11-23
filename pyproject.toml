@@ -25,6 +25,11 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
+  "prefixspan @ git+https://github.com/bolu61/prefixspan@v0.1.0-alpha",
+  "jax==0.4.20",
+  "flax==0.7.5",
+  "optax==0.1.7",
+  "tqdm==4.66.1",
 ]
 
 [project.urls]
@@ -35,8 +40,13 @@ Source = "https://github.com/unknown/worklog"
 [tool.hatch.version]
 source = "vcs"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.envs.default]
 dependencies = [
+  "pyright==1.1.337",
+  "ruff==0.1.6",
   "coverage[toml]>=6.5",
   "pytest",
 ]
@@ -51,100 +61,25 @@ cov = [
   "test-cov",
   "cov-report",
 ]
+format = "ruff format {args:.}"
+typecheck = "pyright"
+lint = [
+  "ruff check --fix {args:.}",
+  "format",
+  "typecheck",
+]
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
-[tool.hatch.envs.lint]
-detached = true
-dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
-  "ruff>=0.0.243",
-]
-[tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/worklog tests}"
-style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
-]
-fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
-
-[tool.black]
-target-version = ["py37"]
-line-length = 120
-skip-string-normalization = true
 
 [tool.ruff]
-target-version = "py37"
-line-length = 120
-select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
-]
-ignore = [
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105", "S106", "S107",
-  # Ignore complexity
-  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
-]
-unfixable = [
-  # Don't touch unused imports
-  "F401",
-]
-
-[tool.ruff.isort]
-known-first-party = ["worklog"]
-
-[tool.ruff.flake8-tidy-imports]
-ban-relative-imports = "all"
-
-[tool.ruff.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
+target-version = "py311"
 
 [tool.coverage.run]
 source_pkgs = ["worklog", "tests"]
 branch = true
 parallel = true
-omit = [
-  "src/worklog/__about__.py",
-]
 
 [tool.coverage.paths]
 worklog = ["src/worklog", "*/worklog/src/worklog"]
