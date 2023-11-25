@@ -5,7 +5,7 @@ from typing import Any, Iterator
 import jax
 import jax.numpy as jnp
 
-from ..core.hmm import interleaved_ergodic_hidden_markov_chain, sequence
+from ..worklog.hmm import interleaved_ergodic_hidden_markov_chain, sequence
 
 
 @dataclass
