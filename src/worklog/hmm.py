@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from functools import wraps
+from functools import partial, wraps
 from itertools import islice
 from typing import Optional
 
@@ -9,6 +9,16 @@ import jax.lax as lax
 import jax.numpy as jnp
 import optax
 from tqdm import tqdm
+
+
+@jax.jit
+def cprod(*a):
+    return jnp.stack(jnp.meshgrid(*a, indexing="ij"), -1).reshape(-1, len(a))
+
+
+@jax.jit
+def log1mexp(x):
+    return jnp.where(x < jnp.log(0.5), jnp.log1p(-jnp.exp(x)), jnp.log(-jnp.expm1(x)))
 
 
 class InterleavedHiddenMarkovChain(nn.Module):
@@ -113,17 +123,37 @@ class InterleavedHiddenMarkovChain(nn.Module):
         )
         return s
 
-    def forward(self, xs):
+    @nn.jit
+    def forward(self, ys):
         ### dim names: (choice, state, state) or (choice, state, alphabet)
-        c = jax.nn.log_softmax(self.choice)[:, jnp.newaxis, jnp.newaxis]
+        c = jax.nn.log_softmax(self.choice)
         t = jax.nn.log_softmax(self.transition)
         e = jax.nn.log_softmax(self.emission)
+        p = jax.nn.log_softmax(self.prior)
+        i = cprod(
+            *[jnp.arange(self.states)] * self.interleaving,
+            jnp.arange(self.interleaving),
+        )
 
-        a = jax.nn.log_softmax(self.prior)[:, :, jnp.newaxis]
+        @partial(jax.vmap, in_axes=(None, 0))
+        @partial(jax.vmap, in_axes=(0, None))
+        def a(x, x_new):
+            s = x[:-1]
+            s_new = x_new[:-1]
+            p = t[x_new[-1], x[x_new[-1]], x_new[x_new[-1]]]
+            a = c[x_new[-1]]
+            return a + jnp.sum(jnp.log(s == s_new).at[c].set(p))
 
-        for x in xs:
-            a = e[:, :, [x]] + jax.nn.logsumexp(c + t + a, axis=(0, 1), keepdims=True)
-        return jax.nn.logsumexp(a)
+        @partial(jax.vmap, in_axes=(0, None))
+        def b(x, y):
+            return e[x[-1], x[x[-1]], y]
+
+        alpha = jnp.sum(cprod(*p, c), -1)
+
+        for y in ys:
+            alpha = b(i, y) + jax.nn.logsumexp(alpha + a(i, i), axis=-1)
+
+        return jax.nn.logsumexp(alpha)
 
 
 def interleaved_ergodic_hidden_markov_chain(
@@ -196,7 +226,9 @@ def train(key, model, trainset, evalset, lr=1, batch_size=16):
     print("compiled forward function")
 
     @jax.jit
-    def step(variables, opt_state, observations):
+    def step(variables, opt_state, xs):
+        (states, choices), observations = xs
+
         @jax.value_and_grad
         def loss(variables, x):
             p = forward(x)
@@ -212,11 +244,10 @@ def train(key, model, trainset, evalset, lr=1, batch_size=16):
     size = len(trainset) // batch_size
 
     def batch(generator):
-        while True:
-            b = [o for _, o in islice(generator, 0, batch_size)]
+        for b in islice(generator, 0, batch_size):
             if len(b) == 0:
                 break
-            yield jnp.stack(b)
+            yield jax.tree_map(lambda *x: jnp.stack(x), *b)
 
     batches = batch(trainset)
 
