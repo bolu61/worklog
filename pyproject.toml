@@ -25,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "prefixspan @ git+https://github.com/bolu61/prefixspan@v0.1.0-alpha",
+  "prefixspan @ git+https://github.com/bolu61/prefixspan@v0.1.4-alpha",
   "jax==0.4.20",
   "flax==0.7.5",
   "optax==0.1.7",
