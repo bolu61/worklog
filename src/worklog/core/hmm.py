@@ -1,14 +1,11 @@
 from collections.abc import Callable
 from functools import partial, wraps
-from itertools import islice
 from typing import Optional
 
 import flax.linen as nn
 import jax
 import jax.lax as lax
 import jax.numpy as jnp
-import optax
-from tqdm import tqdm
 
 
 @jax.jit
@@ -150,11 +147,12 @@ class InterleavedHiddenMarkovChain(nn.Module):
         @partial(jax.vmap, in_axes=(None, 0))
         @partial(jax.vmap, in_axes=(0, None))
         def a(x, x_new):
+            i = x_new[-1]
             s = x[:-1]
             s_new = x_new[:-1]
-            p = t[x_new[-1], x[x_new[-1]], x_new[x_new[-1]]]
-            a = c[x_new[-1]]
-            return a + jnp.sum(jnp.log(s == s_new).at[c].set(p))
+            p = t[i, x[i], x_new[i]]
+            a = c[i]
+            return a + jnp.sum(jnp.log(s == s_new).at[i].set(p))
 
         @partial(jax.vmap, in_axes=(0, None))
         def b(x, y):
@@ -169,11 +167,14 @@ class InterleavedHiddenMarkovChain(nn.Module):
 
 
 def interleaved_ergodic_hidden_markov_chain(
-    interleaving: int, states: int, alphabet: int, shape=1
+    interleaving: int, states: int, alphabet: Optional[int], shape=1
 ):
     """Random Ergodic Hidden Markov Chain
     transition weights are sampled from a beta distribution.
     """
+    if alphabet is None:
+        alphabet = states
+
     shape = jnp.clip(shape, 0.1, 0.9)
 
     def transition_initializer(key, interleaving, states):
@@ -205,72 +206,3 @@ def interleaved_cyclic_markov_chain(
     return InterleavedHiddenMarkovChain(
         interleaving, states, alphabet, transition_initializer=transition_initializer
     )
-
-
-def generate(cell, key, s):
-    while True:
-        s, o = cell(s)
-        yield s
-
-
-def sequence(cell, key, s, length):
-    @jax.jit
-    def wrapper(s, key):
-        (s, i), o = cell(key, s)
-        return s, ((s, i), o)
-
-    _, seq = lax.scan(wrapper, s, jax.random.split(key, length))
-    return seq
-
-
-def train(key, model, trainset, evalset, lr=1, batch_size=16):
-    key, subkey = jax.random.split(key)
-    variables = model.init(subkey, jax.random.key(0), jnp.array([0]))
-
-    optimizer = optax.adam(lr)
-    opt_state = optimizer.init(variables)
-
-    @jax.jit
-    @jax.vmap
-    def forward(x):
-        return model.apply(variables, x, method=model.forward)
-
-    print("compiled forward function")
-
-    @jax.jit
-    def step(variables, opt_state, xs):
-        (states, choices), observations = xs
-
-        @jax.value_and_grad
-        def loss(variables, x):
-            p = forward(x)
-            return -p.mean()
-
-        loss_value, grads = loss(variables, observations)
-        updates, opt_state = optimizer.update(grads, opt_state)
-        variables = optax.apply_updates(variables, updates)
-        return variables, opt_state, loss_value
-
-    print("compiled training step")
-
-    size = len(trainset) // batch_size
-
-    def batch(generator):
-        for b in islice(generator, 0, batch_size):
-            if len(b) == 0:
-                break
-            yield jax.tree_map(lambda *x: jnp.stack(x), *b)
-
-    batches = batch(trainset)
-
-    # use one batch to initialize metrics
-    variables, opt_state, ema_loss = step(variables, opt_state, next(batches))
-
-    # training loop
-    for i, observations in (pbar := tqdm(enumerate(batches), total=size)):
-        variables, opt_state, loss = step(variables, opt_state, observations)
-        ema_loss = 0.5 * loss + 0.5 * ema_loss
-
-        pbar.set_description(f"ema_loss: {ema_loss / i:4.4f}")
-
-    return variables
