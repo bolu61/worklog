@@ -124,7 +124,19 @@ class InterleavedHiddenMarkovChain(nn.Module):
         return s
 
     @nn.jit
-    def forward(self, ys):
+    def forward_separated(self, ys, cs):
+        ### dim names: (choice, state, state) or (choice, state, alphabet)
+        t = jax.nn.log_softmax(self.transition)
+        e = jax.nn.log_softmax(self.emission)
+        a = jax.nn.log_softmax(self.prior)[..., jnp.newaxis]
+
+        for c, y in zip(cs, ys):
+            a = a.at[c].set(e[c, :, y] + nn.logsumexp(t[c] + a[c], axis=0))
+
+        return nn.logsumexp(a)
+
+    @nn.jit
+    def forward_combined(self, ys):
         ### dim names: (choice, state, state) or (choice, state, alphabet)
         c = jax.nn.log_softmax(self.choice)
         t = jax.nn.log_softmax(self.transition)

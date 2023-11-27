@@ -1,7 +1,4 @@
-from collections.abc import MutableSequence, Sequence
-
 from prefixspan import prefixspan
-from functools import partial
 
 
 def propagate(trie: prefixspan, sequence, ids):
@@ -18,9 +15,7 @@ def propagate(trie: prefixspan, sequence, ids):
             if t.empty():
                 break
 
-            if sequence[j] not in t or (
-                ids[j] != ids[i] and ids[j] != 0
-            ):
+            if sequence[j] not in t or (ids[j] != ids[i] and ids[j] != 0):
                 continue
 
             t = t[sequence[j]]
