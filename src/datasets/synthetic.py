@@ -1,10 +1,10 @@
 import jax
 from worklog.core.hmm import interleaved_ergodic_hidden_markov_chain
 
-from .lazy_dataset import LazyDataset
+from .lazy_dataset import LazyDataset, MappedDataset
 
 
-def interleaved_ergodic_process_dataset(
+def interleaved_process_dataset(
     key, size, interleaving, states, alphabet, shape, length
 ):
     """Synthetic dataset of interleaved sequences
@@ -28,7 +28,27 @@ def interleaved_ergodic_process_dataset(
         _, (y, c) = jax.lax.scan(
             wrapper, state, jax.random.split(sequence_subkey, length)
         )
-
         return y, c
 
     return LazyDataset(jax.random.split(key, size), sequence)
+
+
+def masked_process_dataset(
+    key, size, interleaving, states, alphabet, shape, length
+):
+    dataset = interleaved_process_dataset(
+        key=key,
+        size=size,
+        interleaving=interleaving,
+        states=states,
+        alphabet=alphabet,
+        shape=shape,
+        length=length
+    )
+
+    @jax.vmap
+    def mapped(y):
+        o, i = y
+        return o, jax.lax.cond(o == 0, lambda: -1, lambda: i)
+
+    return MappedDataset(dataset, mapped)

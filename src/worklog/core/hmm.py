@@ -111,7 +111,7 @@ class InterleavedHiddenMarkovChain(nn.Module):
         return (s, i), o
 
     def sample(self, key):
-        """samepl from the stationary distribution"""
+        """sample from the stationary distribution"""
         p = jax.nn.softmax(self.prior)
         _, s = lax.scan(
             lambda i, key: (i + 1, jax.random.choice(key, self.states, p=p[i])),
@@ -123,14 +123,15 @@ class InterleavedHiddenMarkovChain(nn.Module):
     @nn.jit
     def sforward(self, ys, cs):
         ### dim names: (choice, state, state) or (choice, state, alphabet)
+        c = jax.nn.log_softmax(self.choice)
         t = jax.nn.log_softmax(self.transition)
         e = jax.nn.log_softmax(self.emission)
-        a = jax.nn.log_softmax(self.prior)[..., jnp.newaxis]
+        a = jax.nn.log_softmax(self.prior)
 
-        for c, y in zip(cs, ys):
-            a = a.at[c].set(e[c, :, y] + nn.logsumexp(t[c] + a[c], axis=0))
+        for y, i in zip(ys, cs):
+            a = a.at[i].set(e[i, :, y] + c[i] + nn.logsumexp(t[i] + a[i, :, jnp.newaxis], axis=0))
 
-        return nn.logsumexp(a)
+        return nn.logsumexp(a.sum(axis=0))
 
     @nn.jit
     def forward(self, ys):
