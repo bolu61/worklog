@@ -30,7 +30,7 @@ dependencies = [
   "flax==0.7.5",
   "optax==0.1.7",
   "scipy==1.11.4",
-  "numpy==1.26.2",
+  "cliffs-delta==1.0.0",
   "tqdm==4.66.1",
 ]
 

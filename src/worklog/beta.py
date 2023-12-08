@@ -1,34 +1,15 @@
-import pickle
 from functools import partial
 from itertools import islice
 from typing import Any, Optional, cast
 
 import jax
-import jax.numpy as jnp
-import numpy as np
 import optax
 from flax.core.scope import VariableDict
-from prefixspan import prefixspan
+from jax import lax
 
 from .core.hmm import (
     InterleavedHiddenMarkovChain,
 )
-from .core.identifiers import propagate
-
-
-def fix(dataset, window=16, stride=12):
-    def small_sequences():
-        for o, _ in dataset:
-            for i in range(0, len(o), stride):
-                yield np.array(o[i : i + window], dtype=np.uint64)
-
-    database = list(small_sequences())
-    trie = prefixspan(database, len(database))
-
-    for o, i in dataset:
-        i = jnp.asarray(propagate(trie, o, i), dtype=jnp.uint32)
-        o = jnp.asarray(o, dtype=jnp.uint32)
-        yield o, i
 
 
 class WorkLogBeta:
@@ -36,18 +17,37 @@ class WorkLogBeta:
     variables: Optional[VariableDict]
     states: Optional[Any]
 
-    def __init__(self, cluster_count, sequence_length, action_count):
+    def __init__(self, cluster_count, sequence_length, action_count, lr=1e-2):
         self.hmm = InterleavedHiddenMarkovChain(
             cluster_count, sequence_length, action_count
         )
-        self.optimizer = optax.adamaxw(learning_rate=1)
+        self.optimizer = optax.adamaxw(learning_rate=lr)
+        self.cluster_count = cluster_count
+        self.sequence_length = sequence_length
+        self.action_count = action_count
         self.variables = None
         self.state = None
 
+    @partial(jax.jit, static_argnums=(2,))
+    def sequence(self, key, length):
+        if self.variables is None:
+            raise RuntimeError("model hasn't been fitted yet")
+        v = self.variables
+
+        def seq(s, k):
+            (s, i), o = self.hmm.apply(v, k, s)
+            return s, o
+
+        sample_key, scan_key = jax.random.split(key)
+        s = self.hmm.apply(self.variables, sample_key, method=self.hmm.sample)
+        s, os = lax.scan(seq, s, jax.random.split(scan_key, length))
+        return os
+
+    @jax.jit
     def forward(self, y):
         if self.variables is None:
             raise RuntimeError("model hasn't been fitted yet")
-        return self.hmm.apply(self.variables, y, method=self.hmm.forward)
+        return cast(jax.Array, self.hmm.apply(self.variables, y, method=self.hmm.sforward))
 
     def fit(self, key, dataset, batch_size=1):
         self.variables = self.variables or self.hmm.init(key, key, jax.numpy.array([0]))
@@ -56,17 +56,17 @@ class WorkLogBeta:
         model = self.hmm
         optimizer = self.optimizer
 
-        @partial(jax.vmap, in_axes=(None, 0, 0))
-        def sforward(variables, o, i):
-            return cast(jax.Array, model.apply(variables, o, i, method=model.sforward))
+        @partial(jax.vmap, in_axes=(None, 0))
+        def forward(variables, os):
+            return cast(jax.Array, model.apply(variables, os, method=model.sforward))
 
         @jax.value_and_grad
-        def objective(variables, o, i):
-            return -sforward(variables, o, i).mean()
+        def objective(variables, os):
+            return -forward(variables, os).mean()
 
         @jax.jit
-        def step(state, variables, o, i):
-            loss, grads = objective(variables, o, i)
+        def step(state, variables, os):
+            loss, grads = objective(variables, os)
             updates, state = optimizer.update(grads, state, variables)
             variables = optax.apply_updates(variables, updates)
             return state, variables, loss
@@ -78,17 +78,23 @@ class WorkLogBeta:
                     break
                 yield jax.tree_map(lambda *x: jax.numpy.stack(x), *b)
 
-        dataset = batch(fix(dataset, 16, 12), batch_size)
+        dataset = batch(iter(dataset), batch_size)
 
         # training loop
-        for o, i in dataset:
-            self.state, self.variables, loss = step(self.state, self.variables, o, i)
+        for os in dataset:
+            self.state, self.variables, loss = step(self.state, self.variables, os)
             yield loss
 
-    def dump(self, file):
-        pickle.dump({"state": self.state, "variables": self.variables}, file)
 
-    def load(self, file):
-        data = pickle.load(file)
-        self.variables = data["variables"]
-        self.state = data["state"]
+def flatten(m):
+    return (m.variables, m.state), (m.cluster_count, m.sequence_length, m.action_count)
+
+
+def unflatten(aux, data):
+    m = WorkLogBeta(*aux)
+    m.variables = data[0]
+    m.state = data[1]
+    return m
+
+
+jax.tree_util.register_pytree_node(WorkLogBeta, flatten, unflatten)

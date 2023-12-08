@@ -72,8 +72,24 @@ class InterleavedHiddenMarkovChain(nn.Module):
             jax.random.split(key, len(p)), p
         )
 
+    def sforward(self, ys):
+        # dim names: (choice, state, state) or (choice, state, alphabet)
+        choice = jax.nn.log_softmax(self.choice)
+        transition = jax.nn.log_softmax(self.transition, axis=-1)
+        emission = jax.nn.log_softmax(self.emission, axis=-1)
+        alpha = jax.nn.log_softmax(self.prior, axis=-1)
+
+        for y in ys:
+            alpha = (
+                emission[:, :, y]
+                + choice[:, None]
+                + nn.logsumexp(transition + alpha[:, :, None], axis=1)
+            )
+
+        return jnp.mean(nn.logsumexp(alpha, axis=1))
+
     def forward(self, ys):
-        ### dim names: (choice, state, state) or (choice, state, alphabet)
+        # dim names: (choice, state, state) or (choice, state, alphabet)
         choice = jax.nn.log_softmax(self.choice)
         transition = jax.nn.log_softmax(self.transition, axis=-1)
         emission = jax.nn.log_softmax(self.emission, axis=-1)
@@ -98,13 +114,12 @@ class InterleavedHiddenMarkovChain(nn.Module):
         alpha = jnp.sum(cprod(*prior, choice), -1)
 
         for y in ys:
-            alpha = jax.lax.map(
+            alpha = jax.vmap(
                 lambda x_new: b(x_new, y)
                 + jax.nn.logsumexp(
                     jax.vmap(a, in_axes=(0, None, 0))(index, x_new, alpha)
-                ),
-                index,
-            )
+                )
+            )(index)
 
         return jax.nn.logsumexp(alpha)
 

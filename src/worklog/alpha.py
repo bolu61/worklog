@@ -3,14 +3,12 @@ from itertools import islice
 from typing import Any, Optional, cast
 
 import jax
-import numpy as np
 import optax
 from flax.core.scope import VariableDict
-from scipy.stats import mannwhitneyu
+from jax import lax
 
 from .core.hmm import (
     InterleavedHiddenMarkovChain,
-    interleaved_ergodic_hidden_markov_chain,
 )
 
 
@@ -18,21 +16,38 @@ class WorkLogAlpha:
     hmm: InterleavedHiddenMarkovChain
     variables: Optional[VariableDict]
     states: Optional[Any]
-    step_count: int
 
-    def __init__(self, cluster_count, sequence_length, action_count):
-        self.hmm = interleaved_ergodic_hidden_markov_chain(
+    def __init__(self, cluster_count, sequence_length, action_count, lr=1e-2):
+        self.hmm = InterleavedHiddenMarkovChain(
             cluster_count, sequence_length, action_count
         )
-        self.optimizer = optax.adamaxw(learning_rate=1)
+        self.optimizer = optax.adamaxw(learning_rate=lr)
+        self.cluster_count = cluster_count
+        self.sequence_length = sequence_length
+        self.action_count = action_count
         self.variables = None
         self.state = None
-        self.step_count = 0
 
+    @partial(jax.jit, static_argnums=(2,))
+    def sequence(self, key, length):
+        if self.variables is None:
+            raise RuntimeError("model hasn't been fitted yet")
+        v = self.variables
+
+        def seq(s, k):
+            (s, i), o = self.hmm.apply(v, k, s)
+            return s, o
+
+        sample_key, scan_key = jax.random.split(key)
+        s = self.hmm.apply(self.variables, sample_key, method=self.hmm.sample)
+        s, os = lax.scan(seq, s, jax.random.split(scan_key, length))
+        return os
+
+    @jax.jit
     def forward(self, y):
         if self.variables is None:
             raise RuntimeError("model hasn't been fitted yet")
-        return self.hmm.apply(self.variables, y, method=self.hmm.forward)
+        return cast(jax.Array, self.hmm.apply(self.variables, y, method=self.hmm.forward))
 
     def fit(self, key, dataset, batch_size=1):
         self.variables = self.variables or self.hmm.init(key, key, jax.numpy.array([0]))
@@ -68,36 +83,18 @@ class WorkLogAlpha:
         # training loop
         for os in dataset:
             self.state, self.variables, loss = step(self.state, self.variables, os)
-            self.step_count += 1
-            yield self.step_count, loss.item()
+            yield loss
 
-    def evaluate(self, key, dataset):
-        mc = self.hmm
-        variables = self.variables or self.hmm.init(key, key, jax.numpy.array([0]))
 
-        @jax.jit
-        def sequence(key, length):
-            sample_subkey, sequence_subkey = jax.random.split(key, 2)
-            state = mc.apply(variables, sample_subkey, method=mc.sample)
+def flatten(m):
+    return (m.variables, m.state), (m.cluster_count, m.sequence_length, m.action_count)
 
-            @jax.jit
-            def wrapper(s, key):
-                (s, c), y = mc.apply(variables, key, s)
-                return s, (y, c)
 
-            _, (y, c) = jax.lax.scan(
-                wrapper, state, jax.random.split(sequence_subkey, length)
-            )
-            return y, c
+def unflatten(aux, data):
+    m = WorkLogAlpha(*aux)
+    m.variables = data[0]
+    m.state = data[1]
+    return m
 
-        totals = np.zeros((self.hmm.alphabet, len(dataset)), dtype=np.uint32)
-        totals_pred = np.zeros((self.hmm.alphabet, len(dataset)), dtype=np.uint32)
-        for i, os in enumerate(dataset):
-            for o in os:
-                totals[o, i] += 1
-            for o in sequence(key, len(os)):
-                totals_pred[o, i] += 1
 
-        return np.mean(np.abs(totals - totals_pred), axis=1), mannwhitneyu(
-            totals, totals_pred, axis=1
-        )
+jax.tree_util.register_pytree_node(WorkLogAlpha, flatten, unflatten)
