@@ -1,10 +1,7 @@
-from collections.abc import Callable
-from functools import wraps
-from typing import Optional
+from typing import Any, Optional
 
 import flax.linen as nn
 import jax
-import jax.lax as lax
 import jax.numpy as jnp
 
 
@@ -19,60 +16,13 @@ def log1mexp(x):
 
 
 class InterleavedHiddenMarkovChain(nn.Module):
-    @staticmethod
-    def logits_init(prob_initializer):
-        @wraps(prob_initializer)
-        def wrapper(key, *args, **kwargs):
-            probs = prob_initializer(key, *args, **kwargs)
-            probs = jnp.clip(probs, a_min=1e-8, a_max=1)
-            probs = jnp.log(probs)
-            return probs
-
-        return wrapper
-
-    @staticmethod
-    @logits_init
-    def uniform_choice_unitializer(key, interleaving):
-        return jax.random.uniform(key, shape=(interleaving,))
-
-    @staticmethod
-    @logits_init
-    def uniform_transition_initializer(key, interleaving, states):
-        return jax.random.uniform(
-            key, shape=(interleaving, states, states), minval=0, maxval=1
-        )
-
-    @staticmethod
-    @logits_init
-    def uniform_emission_initializer(key, interleaving, states, alphabet):
-        return lax.map(
-            lambda key: jax.random.permutation(
-                key, jax.random.permutation(key, jnp.eye(states, alphabet)), axis=1
-            ),
-            jax.random.split(key, interleaving),
-        )
-
-    @staticmethod
-    @logits_init
-    def stationary_initializer(key, transition):
-        transition = jnp.exp(nn.log_softmax(transition))
-        eigvalues, eigvectors = jnp.linalg.eig(jnp.transpose(transition, (1, 0)))
-        solution = jnp.isclose(eigvalues, 1)
-        # it will be scaled accordingly using softmax
-        return jnp.real(eigvectors)[:, jnp.argmax(solution)]
-
     interleaving: int
     states: int
     alphabet: int
-    choice_initializer: Callable[
-        [jax.Array, int], jax.Array
-    ] = uniform_choice_unitializer
-    transition_initializer: Callable[
-        [jax.Array, int, int], jax.Array
-    ] = uniform_transition_initializer
-    emission_initializer: Callable[
-        [jax.Array, int, int, int], jax.Array
-    ] = uniform_emission_initializer
+    choice_initializer: Any = nn.initializers.uniform()
+    prior_initializer: Any = nn.initializers.glorot_uniform()
+    transition_initializer: Any = nn.initializers.glorot_uniform()
+    emission_initializer: Any = nn.initializers.glorot_uniform()
 
     def __hash__(self):
         return hash(id(self))
@@ -81,22 +31,24 @@ class InterleavedHiddenMarkovChain(nn.Module):
         self.transition = self.param(
             "transition",
             self.transition_initializer,
-            self.interleaving,
-            self.states,
+            (self.interleaving, self.states, self.states),
+            jnp.float32,
         )
         self.emission = self.param(
             "emission",
             self.emission_initializer,
-            self.interleaving,
-            self.states,
-            self.alphabet,
+            (self.interleaving, self.states, self.alphabet),
+            jnp.float32,
         )
-        self.choice = self.param("choice", self.choice_initializer, self.interleaving)
+        self.choice = self.param(
+            "choice", self.choice_initializer, (self.interleaving,), jnp.float32
+        )
 
         self.prior = self.param(
             "prior",
-            jax.vmap(self.stationary_initializer, in_axes=(None, 0)),
-            self.transition,
+            self.prior_initializer,
+            (self.interleaving, self.states),
+            jnp.float32,
         )
 
     def __call__(self, key, s):
@@ -136,8 +88,7 @@ class InterleavedHiddenMarkovChain(nn.Module):
             return (
                 alpha
                 + choice[i]
-                + transition[i, x[i], x_new[i]]
-                + jnp.sum(jnp.log(s == s_new))
+                + jnp.sum(jnp.log(s == s_new).at[i].set(transition[i, s[i], s_new[i]]))
             )
 
         def b(x, y):
@@ -169,17 +120,34 @@ def interleaved_ergodic_hidden_markov_chain(
 
     shape = jnp.clip(shape, 0.1, 0.9)
 
-    def transition_initializer(key, interleaving, states):
+    def transition_initializer(key, shape, dtype):
         key, subkey = jax.random.split(key)
-        t = jax.random.beta(
-            subkey, a=1 - shape, b=shape, shape=(interleaving, states, states)
+        t = jnp.log(
+            jax.random.beta(
+                subkey,
+                a=1 - shape,
+                b=shape,
+                shape=(interleaving, states, states),
+                dtype=dtype,
+            )
         )
-        t = jnp.clip(t, a_min=1e-8, a_max=1)
-        t = t / jnp.sum(t, axis=2, keepdims=True)
         return t
 
+    def emission_initializer(key, shape, dtype):
+        interleaving, states, alphabet = shape
+        e = jax.vmap(
+            lambda key: jax.random.permutation(
+                key, jnp.eye(states, alphabet, dtype=dtype)
+            )
+        )(jax.random.split(key, interleaving))
+        return jnp.log(e)
+
     return InterleavedHiddenMarkovChain(
-        interleaving, states, alphabet, transition_initializer=transition_initializer
+        interleaving,
+        states,
+        alphabet,
+        transition_initializer=transition_initializer,
+        emission_initializer=emission_initializer,
     )
 
 
@@ -189,12 +157,26 @@ def interleaved_cyclic_markov_chain(
     if alphabet is None:
         alphabet = states
 
-    def transition_initializer(key, interleaving, states):
-        t = jnp.eye(states)
+    def transition_initializer(key, shape, dtype):
+        interleaving, states, states = shape
+        t = jnp.eye(states, dtype=dtype)
         t = jnp.roll(t, 1, axis=-1)
         t = jnp.repeat(t[jnp.newaxis, :, :], interleaving, axis=0)
-        return t
+        return jnp.log(t)
+
+    def emission_initializer(key, shape, dtype):
+        interleaving, states, alphabet = shape
+        e = jax.vmap(
+            lambda key: jax.random.permutation(
+                key, jnp.eye(states, alphabet, dtype=dtype)
+            )
+        )(jax.random.split(key, interleaving))
+        return jnp.log(e)
 
     return InterleavedHiddenMarkovChain(
-        interleaving, states, alphabet, transition_initializer=transition_initializer
+        interleaving,
+        states,
+        alphabet,
+        transition_initializer=transition_initializer,
+        emission_initializer=emission_initializer,
     )
