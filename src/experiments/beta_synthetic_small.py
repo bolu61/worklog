@@ -1,4 +1,3 @@
-
 # %%
 import jax
 from datasets.synthetic import masked_process_dataset
@@ -11,10 +10,15 @@ dataset_key, training_key = jax.random.split(key, 2)
 
 # %%
 ACTION_COUNT = 4
+SEQUENCE_LENGTH = 4
 CLUSTER_COUNT = 4
 
 # account for extra cluster 0 to catch missing classes
-model = WorkLogBeta(cluster_count=CLUSTER_COUNT, action_count=ACTION_COUNT)
+model = WorkLogBeta(
+    cluster_count=CLUSTER_COUNT,
+    sequence_length=SEQUENCE_LENGTH,
+    action_count=ACTION_COUNT,
+)
 
 # %%
 SAMPLES_COUNT = 1024

@@ -1,17 +1,19 @@
 import pickle
 from functools import partial
 from itertools import islice
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
+from flax.core.scope import VariableDict
+from prefixspan import prefixspan
 
 from .core.hmm import (
     InterleavedHiddenMarkovChain,
 )
-from .core.identifiers import prefixspan, propagate
+from .core.identifiers import propagate
 
 
 def fix(dataset, window=16, stride=12):
@@ -31,18 +33,20 @@ def fix(dataset, window=16, stride=12):
 
 class WorkLogBeta:
     hmm: InterleavedHiddenMarkovChain
-    variables: Optional[Any]
+    variables: Optional[VariableDict]
     states: Optional[Any]
 
-    def __init__(self, cluster_count, action_count):
+    def __init__(self, cluster_count, sequence_length, action_count):
         self.hmm = InterleavedHiddenMarkovChain(
-            cluster_count, action_count, action_count
+            cluster_count, sequence_length, action_count
         )
         self.optimizer = optax.adamaxw(learning_rate=1)
         self.variables = None
         self.state = None
 
     def forward(self, y):
+        if self.variables is None:
+            raise RuntimeError("model hasn't been fitted yet")
         return self.hmm.apply(self.variables, y, method=self.hmm.forward)
 
     def fit(self, key, dataset, batch_size=1):
@@ -54,7 +58,7 @@ class WorkLogBeta:
 
         @partial(jax.vmap, in_axes=(None, 0, 0))
         def sforward(variables, o, i):
-            return model.apply(variables, o, i, method=model.sforward)
+            return cast(jax.Array, model.apply(variables, o, i, method=model.sforward))
 
         @jax.value_and_grad
         def objective(variables, o, i):

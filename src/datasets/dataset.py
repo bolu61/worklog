@@ -1,36 +1,39 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Generator, Generic, Sequence, TypeVar, Union
 
-from jax.typing import ArrayLike
+__all__ = ["dataset"]
 
 S = TypeVar("S")
 T = TypeVar("T")
 
 
+def dataset(data: Sequence[T]) -> "Dataset[T]":
+    return Dataset(data)
+
+
 @dataclass
-class LazyDataset(Generic[T]):
-    keys: Sequence[ArrayLike]
-    func: Callable[[ArrayLike], T]
+class Dataset(Generic[T]):
+    data: Sequence[T]
 
     def __iter__(self) -> Generator[T, None, None]:
-        for key in self.keys:
-            yield self.func(key)
+        yield from self.data
 
-    def __getitem__(self, index) -> T:
-        return self.func(self.keys[index])
+    def __getitem__(self, key) -> T:
+        return self.data[key]
 
     def __len__(self):
-        return len(self.keys)
+        return len(self.data)
 
-    def split(self, count) -> tuple["LazyDataset[T]", "LazyDataset[T]"]:
-        return LazyDataset(self.keys[:count], self.func), LazyDataset(
-            self.keys[count:], self.func
-        )
+    def split(self, count) -> tuple["Dataset[T]", "Dataset[T]"]:
+        return Dataset(self.data[:count]), Dataset(self.data[count:])
+
+    def map(self, f):
+        return MappedDataset(self, f)
 
 
 @dataclass
 class MappedDataset(Generic[S, T]):
-    dataset: Union[LazyDataset[S], "MappedDataset[Any, S]"]
+    dataset: Union[Dataset[S], "MappedDataset[Any, S]"]
     func: Callable[[S], T]
 
     def __iter__(self):
@@ -46,3 +49,6 @@ class MappedDataset(Generic[S, T]):
     def split(self, count) -> tuple["MappedDataset[S, T]", "MappedDataset[S, T]"]:
         a, b = self.dataset.split(count)
         return MappedDataset(a, self.func), MappedDataset(b, self.func)
+
+    def map(self, f):
+        return MappedDataset(self, f)

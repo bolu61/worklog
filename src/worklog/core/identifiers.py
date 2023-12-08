@@ -7,7 +7,7 @@ def propagate(trie: prefixspan, sequence, ids):
     """Propagate IDs according to the input prefixspan trie and sequence.
     IDs are positive non-zero integers; an ID of -1 indicates an unknown class.
     """
-    ids = array('i', ids)
+    ids = array("i", ids)
     for i in range(len(sequence)):
         if ids[i] == -1:
             ids[i] = 0
