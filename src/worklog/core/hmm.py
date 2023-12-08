@@ -120,14 +120,14 @@ def interleaved_ergodic_hidden_markov_chain(
 
     shape = jnp.clip(shape, 0.1, 0.9)
 
-    def transition_initializer(key, shape, dtype):
+    def transition_initializer(key, shape_, dtype):
         key, subkey = jax.random.split(key)
         t = jnp.log(
             jax.random.beta(
                 subkey,
                 a=1 - shape,
                 b=shape,
-                shape=(interleaving, states, states),
+                shape=shape_,
                 dtype=dtype,
             )
         )
