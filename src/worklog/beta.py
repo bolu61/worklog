@@ -47,7 +47,9 @@ class WorkLogBeta:
     def forward(self, y):
         if self.variables is None:
             raise RuntimeError("model hasn't been fitted yet")
-        return cast(jax.Array, self.hmm.apply(self.variables, y, method=self.hmm.sforward))
+        return cast(
+            jax.Array, self.hmm.apply(self.variables, y, method=self.hmm.sforward)
+        )
 
     def fit(self, key, dataset, batch_size=1):
         self.variables = self.variables or self.hmm.init(key, key, jax.numpy.array([0]))

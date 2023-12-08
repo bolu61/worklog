@@ -35,7 +35,7 @@ datasets = {
 models = {
     "base": lambda action_count: WorkLogAlpha(1, 1, action_count, lr=1e-2),
     "alpha": lambda action_count: WorkLogAlpha(4, 4, action_count, lr=1e-2),
-    "beta": lambda action_count: WorkLogBeta(4, 16, action_count, lr=1e-1)
+    "beta": lambda action_count: WorkLogBeta(4, 16, action_count, lr=1e-1),
 }
 
 
@@ -86,7 +86,9 @@ def run(name, model, dataset, action_count):
     return {
         "throughput": t_pred.mean(0),
         "difference": t_true.mean(0) - t_pred.mean(0),
-        "cliffs": jnp.array([cliffs_delta(t_true[:, i], t_pred[:, i])[0] for i in range(action_count)]),
+        "cliffs": jnp.array(
+            [cliffs_delta(t_true[:, i], t_pred[:, i])[0] for i in range(action_count)]
+        ),
         "pvalue": pvalue,
     }
 
