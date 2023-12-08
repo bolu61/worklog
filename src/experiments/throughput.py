@@ -7,6 +7,7 @@ import jax.numpy as jnp
 from cliffs_delta import cliffs_delta
 from experiments.datasets import (
     apache_james,
+    easy_synthetic_dataset,
     google_borg,
     openmrs,
 )
@@ -20,12 +21,12 @@ key = jax.random.key(0xCAFEB0BA)
 dataset_key, training_key, evaluation_key = jax.random.split(key, 3)
 
 BATCH_SIZE = 10
-EPOCH_COUNT = 3
+EPOCH_COUNT = 8
 TRAIN_RATIO = 0.9
 
 dka, dkb, dkc, dkd = jax.random.split(dataset_key, 4)
 datasets = {
-    # "synthetic": (easy_synthetic_dataset(key=dka), 4),
+    "synthetic": (easy_synthetic_dataset(key=dka), 4),
     "apache_james": (apache_james(key=dkb), 2),
     "openmrs": (openmrs(key=dkc), 4),
     "google_borg": (google_borg(key=dkb), 6),
