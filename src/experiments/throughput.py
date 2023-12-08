@@ -22,11 +22,11 @@ dataset_key, training_key, evaluation_key = jax.random.split(key, 3)
 
 BATCH_SIZE = 10
 EPOCH_COUNT = 3
-TRAIN_RATIO = 0.90
+TRAIN_RATIO = 0.9
 
 dka, dkb, dkc, dkd = jax.random.split(dataset_key, 4)
 datasets = {
-    "synthetic": (easy_synthetic_dataset(key=dka), 4),
+    # "synthetic": (easy_synthetic_dataset(key=dka), 4),
     "apache_james": (apache_james(key=dkb), 2),
     "openmrs": (openmrs(key=dkc), 4),
     "google_borg": (google_borg(key=dkb), 6),
@@ -35,7 +35,7 @@ datasets = {
 models = {
     "base": lambda action_count: WorkLogAlpha(1, 1, action_count, lr=1e-2),
     "alpha": lambda action_count: WorkLogAlpha(4, 4, action_count, lr=1e-2),
-    "beta": lambda action_count: WorkLogBeta(4, 16, action_count, lr=1e-1),
+    "beta": lambda action_count: WorkLogBeta(4, 4, action_count, lr=1e-1),
 }
 
 
