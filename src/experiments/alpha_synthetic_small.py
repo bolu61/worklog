@@ -9,21 +9,14 @@ key = jax.random.key(0xCAFEB0BA)
 
 dataset_key, training_key, evaluation_key = jax.random.split(key, 3)
 
-# %%
 CLUSTER_COUNT = 4
 SEQUENCE_LENGTH = 4
 ACTION_COUNT = 4
-
-model = WorkLogAlpha(
-    cluster_count=CLUSTER_COUNT,
-    sequence_length=SEQUENCE_LENGTH,
-    action_count=ACTION_COUNT,
-)
-
-# %%
 TRAIN_SAMPLES_COUNT = 1024
 EVAL_SAMPLES_COUNT = 256
+BATCH_SIZE = 1
 
+# %%
 dataset = masked_process_dataset(
     key=dataset_key,
     size=TRAIN_SAMPLES_COUNT + EVAL_SAMPLES_COUNT,
@@ -37,7 +30,12 @@ dataset = masked_process_dataset(
 trainset, evalset = dataset.split(TRAIN_SAMPLES_COUNT)
 
 # %%
-BATCH_SIZE = 1
+model = WorkLogAlpha(
+    cluster_count=CLUSTER_COUNT,
+    sequence_length=SEQUENCE_LENGTH,
+    action_count=ACTION_COUNT,
+)
+
 steps = model.fit(training_key, trainset, BATCH_SIZE)
 
 total_loss = 0
