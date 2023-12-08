@@ -86,7 +86,9 @@ def run(name, model, dataset, action_count):
     return {
         "throughput": t_pred.mean(0).tolist(),
         "difference": (t_true.mean(0) - t_pred.mean(0)).tolist(),
-        "cliffs": [cliffs_delta(t_true[:, i], t_pred[:, i])[0] for i in range(action_count)],
+        "cliffs": [
+            cliffs_delta(t_true[:, i], t_pred[:, i])[0] for i in range(action_count)
+        ],
         "pvalue": pvalue.tolist(),
     }
 
