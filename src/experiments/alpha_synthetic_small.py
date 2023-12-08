@@ -38,12 +38,13 @@ trainset, evalset = dataset.split(TRAIN_SAMPLES_COUNT)
 
 # %%
 BATCH_SIZE = 1
-steps = model.fit(training_key, dataset, BATCH_SIZE)
+steps = model.fit(training_key, trainset, BATCH_SIZE)
 
-loss_total = 0
+total_loss = 0
 for i, loss in (pbar := tqdm(steps, total=len(trainset) // BATCH_SIZE)):
-    loss_total += loss
-    perplexity = jnp.exp(loss / i)
-    pbar.set_description(f"loss={loss_total / (i + 1):4.4f}")
+    total_loss += loss
+    mean_loss = total_loss / i
+    perplexity = jnp.exp(total_loss / i)
+    pbar.set_description(f"loss={mean_loss:4.4f} perplexity={perplexity:4.4f}")
 
 # %%
