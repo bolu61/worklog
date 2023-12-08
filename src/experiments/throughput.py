@@ -7,7 +7,6 @@ import jax.numpy as jnp
 from cliffs_delta import cliffs_delta
 from experiments.datasets import (
     apache_james,
-    easy_synthetic_dataset,
     google_borg,
     openmrs,
 )
