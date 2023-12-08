@@ -22,7 +22,7 @@ dataset_key, training_key, evaluation_key = jax.random.split(key, 3)
 
 BATCH_SIZE = 10
 EPOCH_COUNT = 3
-TRAIN_RATIO = 0.99
+TRAIN_RATIO = 0.90
 
 dka, dkb, dkc, dkd = jax.random.split(dataset_key, 4)
 datasets = {
@@ -84,12 +84,10 @@ def run(name, model, dataset, action_count):
     _, pvalue = mannwhitneyu(t_true, t_pred, axis=0)
 
     return {
-        "throughput": t_pred.mean(0),
-        "difference": t_true.mean(0) - t_pred.mean(0),
-        "cliffs": jnp.array(
-            [cliffs_delta(t_true[:, i], t_pred[:, i])[0] for i in range(action_count)]
-        ),
-        "pvalue": pvalue,
+        "throughput": t_pred.mean(0).tolist(),
+        "difference": (t_true.mean(0) - t_pred.mean(0)).tolist(),
+        "cliffs": [cliffs_delta(t_true[:, i], t_pred[:, i])[0] for i in range(action_count)],
+        "pvalue": pvalue.tolist(),
     }
 
 
