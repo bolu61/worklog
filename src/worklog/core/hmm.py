@@ -140,7 +140,7 @@ def interleaved_ergodic_hidden_markov_chain(
                 key, jnp.eye(states, alphabet, dtype=dtype)
             )
         )(jax.random.split(key, interleaving))
-        return jnp.log(e)
+        return jnp.clip(jnp.log(e), -1e8)
 
     return InterleavedHiddenMarkovChain(
         interleaving,
@@ -162,7 +162,7 @@ def interleaved_cyclic_markov_chain(
         t = jnp.eye(states, dtype=dtype)
         t = jnp.roll(t, 1, axis=-1)
         t = jnp.repeat(t[jnp.newaxis, :, :], interleaving, axis=0)
-        return jnp.log(t)
+        return jnp.clip(jnp.log(t), -1e8)
 
     def emission_initializer(key, shape, dtype):
         interleaving, states, alphabet = shape
@@ -171,7 +171,7 @@ def interleaved_cyclic_markov_chain(
                 key, jnp.eye(states, alphabet, dtype=dtype)
             )
         )(jax.random.split(key, interleaving))
-        return jnp.log(e)
+        return jnp.clip(jnp.log(e), -1e8)
 
     return InterleavedHiddenMarkovChain(
         interleaving,
