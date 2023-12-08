@@ -99,8 +99,6 @@ class InterleavedHiddenMarkovChain(nn.Module):
             self.transition,
         )
 
-        self.cprior = self.param("cprior", self.stationary_initializer, self.choice)
-
     def __call__(self, key, s):
         ckey, tkey, ekey = jax.random.split(key, 3)
         # choose a chain
