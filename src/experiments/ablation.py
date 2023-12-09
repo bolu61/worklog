@@ -63,7 +63,8 @@ datasets = {
 models = {
     "base": lambda action_count: WorkLogAlpha(1, 1, action_count, lr=1e-2),
     "alpha": lambda action_count: WorkLogAlpha(4, 4, action_count, lr=1e-2),
-    "beta": lambda action_count: WorkLogBeta(4, 4, action_count, lr=1e-1),
+    "beta_wide": lambda action_count: WorkLogBeta(16, 4, action_count, lr=1),
+    "beta_large": lambda action_count: WorkLogBeta(4, 16, action_count, lr=1),
 }
 
 
