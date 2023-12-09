@@ -20,11 +20,11 @@ load testing.
 \subsection{Background}
 
 Event log-producing workloads can be seen as an interleaved Markov process
-(IMP). Such a process can be modelled with an interleaved hidden Markov model
-(HMM). It combines a mixture of individual HMM that each models a single
-independent process. In load testing, tasks can be modelled by such a process.
-By training an interleaved HMM, we can generate new workloads based on the
-processes themselves, leading to realistic yet high-variance synthetic
+(IMP). Such a process can be modeled with an interleaved hidden Markov model
+(HMM). It combines a mixture of individual HMM, each modeling a single
+independent process. In load testing, tasks can be modeled by such a process. We
+can generate new workloads based on the processes using an interleaved HMM
+trained on those processes, leading to realistic yet high-variance synthetic
 workloads.
 
 \section{Implementing Interleaved HMM}
@@ -33,21 +33,32 @@ I have implemented an interleaved HMM using the Flax\cite{Heek2023-nl} framework
 and in this section, I will go over the implementation details and how it is
 trained.
 
-Consider a single HMM \(\mu\) with states \(1, 2, ...,n\) in \(S_\mu\). Then, we
-can fit this HMM on a hidden process by maximizing the probability of the HMM
-generating an observed sequence \(P(y_{1..T} | \mu)\). Since an observation
-\(Y_t\) is only dependant on the current state \(X_t\), we can write this
+Consider a single HMM \(\mu\) with states \(1, 2, ...,n\) in \(S_\mu\). To fit
+this HMM on a hidden process, we can maximize the likelihood \(\mathcal{L}(\mu |
+\seq{y_t}_t) = p_\mu(\seq{y_t}_t)\) of \(\mu\) given observations from the
+hidden process \(\seq{y_t}_t = \seq{y_1, y_2, ..., y_t}\). Since an observation
+\(y_t\) is only dependant on the current state \(x_t\), we can write this
 probability like so:
-\[P(y_{1..T} | \mu) = \sum_{x_T} P(x_T, y_{1..T}| \mu),\] where it can be
-demonstrated that for \(1 \leq t \leq T\)
-\[P(x_t, y_{1..t} | \mu) = P(y_t|x_t, \mu) \sum_{x_{t-1}} P(x_t|x_{t-1}, \mu) P(x_{t-1}, y_{1..t-1}| \mu).\]
-\[P(x_1, y_{1..1} | \mu) = P(y_1|x_1, \mu) \sum_{x_{0}} P(x_0 | \mu) = P(y_1 | x_1, \mu)\]
-\(P(y_t|x_t, \mu)\) is the emission probability of \(\mu\), \(P(x_t
-| x_t, \mu)\) is the transition probability, and \(P(x_0 | \mu)\) is the prior
-or stationary probability of the states. Then the fitted model can be found by
+\begin{equation}\label{eq:likelihood}
+    p_\mu(\seq{y_t}_t) = \sum_{x_t} p_\mu(x_t, \seq{y_t}_t),
+\end{equation}
+where it can be demonstrated by recursively applying the chain rule that for \(1
+\leq t \leq T\)
+\begin{equation}
+    \begin{multlined}
+        p_\mu(x_t, \seq{y_t}_t) = \\
+        p_\mu(y_t|x_t) \sum_{x_{t-1}} p_\mu(x_t|x_{t-1}) p_\mu(x_{t-1}, \seq{y_t}_{t-1}).
+    \end{multlined}
+\end{equation}
+\begin{equation}\label{eq:max_likelihood}
+    p_\mu(x_0, \seq{}) = p_\mu(x_0)
+\end{equation}
+\(p_\mu(y_t|x_t)\) is the emission probability of \(\mu\), \(p_\mu(x_t | x_t)\)
+is the transition probability and \(p_\mu(x_0)\) is the prior or stationary
+probability of the states. Then, the fitted model \(\hat{\mu}\) is one that maximizes \cref{eq:likelihood}
 \begin{equation}
     \label{eq:argmax_observation}
-    \argmax_{\mu} P(y_{1..T} | \mu).
+    \hat{\mu} = \argmax_{\mu} p_\mu(\seq{y_t}_t).
 \end{equation}
 
 This recursive equation can be solved using the forward algorithm described in
