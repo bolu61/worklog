@@ -1,0 +1,116 @@
+% !TeX root = main.tex
+\input{preamble}
+
+\title{Project Final Report: Generating Realistic Workloads}
+\author{JianChen Zhao}
+\email{jianchen.zhao@uwaterloo.ca}
+
+\addbibresource{paperpile.bib}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+In this project, I have set to model the event log generation processes in
+large-scale software systems to improve realistic workload synthesis for system
+load testing.
+
+\subsection{Background}
+
+Event log-producing workloads can be seen as an interleaved Markov process
+(IMP). Such a process can be modelled with an interleaved hidden Markov model
+(HMM). It combines a mixture of individual HMM that each models a single
+independent process. In load testing, tasks can be modelled by such a process.
+By training an interleaved HMM, we can generate new workloads based on the
+processes themselves, leading to realistic yet high-variance synthetic
+workloads.
+
+\section{Implementing Interleaved HMM}
+
+I have implemented an interleaved HMM using the Flax\cite{Heek2023-nl} framework
+and in this section, I will go over the implementation details and how it is
+trained.
+
+Consider a single HMM \(\mu\) with states \(1, 2, ...,n\) in \(S_\mu\). Then, we
+can fit this HMM on a hidden process by maximizing the probability of the HMM
+generating an observed sequence \(P(y_{1..T} | \mu)\). Since an observation
+\(Y_t\) is only dependant on the current state \(X_t\), we can write this
+probability like so:
+\[P(y_{1..T} | \mu) = \sum_{x_T} P(x_T, y_{1..T}| \mu),\] where it can be
+demonstrated that for \(1 \leq t \leq T\)
+\[P(x_t, y_{1..t} | \mu) = P(y_t|x_t, \mu) \sum_{x_{t-1}} P(x_t|x_{t-1}, \mu) P(x_{t-1}, y_{1..t-1}| \mu).\]
+\[P(x_1, y_{1..1} | \mu) = P(y_1|x_1, \mu) \sum_{x_{0}} P(x_0 | \mu) = P(y_1 | x_1, \mu)\]
+\(P(y_t|x_t, \mu)\) is the emission probability of \(\mu\), \(P(x_t
+| x_t, \mu)\) is the transition probability, and \(P(x_0 | \mu)\) is the prior
+or stationary probability of the states. Then the fitted model can be found by
+\begin{equation}
+    \label{eq:argmax_observation}
+    \argmax_{\mu} P(y_{1..T} | \mu).
+\end{equation}
+
+This recursive equation can be solved using the forward algorithm described in
+\cref{alg:forward}. The forward algorithm has space complexity \(O(n)\)  and
+time complexity \(O(nT)\) where \(n\) is the number of possible states and \(T\)
+is the length of the input sequence. In the context of interleaved HMM \(\mu\),
+there are \(K\) individual HMMs \(\mu_k\), the state of \(\mu\) must encode the
+states of all \(\mu_k\). Thus, no matter the encoding, the time and space
+complexity of the forward algorithm will be exponential with respect to \(K\).
+In fact, training the interleaved HMM is NP-hard\cite{Landwehr2008-vw}.
+\citeauthor{Landwehr2008-vw} shows an alternative approximate algorithm for
+training, but I have yet to implement it.
+\begin{algorithm}[H]
+    \caption{The forward algorithm.}\label{alg:forward}
+    \begin{algorithmic}[1]
+        \Function{Forward}{$o_{1..T}$}
+        \For{$i \gets 1 .. n$}
+        \State $\alpha_i \gets \pi_i$
+        \EndFor
+        \For{$t \gets 1 .. T$}
+        \For{$i \gets 1 .. n$}
+        \State $\alpha_i \gets P(o_t|s_{i,t}) \sum_{s_{i, t-1}} P(s_{i, t} | s_{i, t-1}) \alpha_i$Í
+        \EndFor
+        \EndFor
+        \State \Return $\sum_{i} \alpha_i$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+Since the forward algorithm's gradient can be automatically computed by
+Jax\cite{Bradbury2018-jz}, on which Flax is based, \cref{eq:argmax_observation}
+can be found using gradient descent. Specifically, I used the
+Adam\cite{Kingma2014-jj} optimizer on a synthetic dataset described in
+\cref{sec:dataset}. I implemented the forward algorithm in \(\log\) space for
+better numerical stability and thus the optimized loss is the negative
+log-likelihood:
+\begin{equation}
+    \label{eq:neg_log_likelihood}
+    \argmin_{\mu} - \log P(y_{1..T} | \mu).
+\end{equation}
+
+\section{Exploring Google Borg Dataset}\label{sec:dataset}
+
+Because the current implementation of the forward algorithm can not handle
+complex data using a reasonable amount of resources, I have not trained the
+interleaved HMM on the Google Borg dataset. This dataset contains logs generated
+from thousands of machines, thus thousands of possible Markov processes.
+
+Instead, I've spent time designing a synthetic dataset using the implemented
+interleaved HMM with transition weights sampled from a beta distribution
+\(\text{Beta}(\alpha=0.1, \beta=0.9)\).  The number of states and subchains in
+the generating model can be customized. This dataset generates interleaved
+sequences over an alphabet on the fly. To test my implementation, I trained a
+different HMM with randomly initialized logits for the transition and emission
+probabilities.
+
+Once trained, I measured the loss of the model, specifically the choice state
+variable. I have found that the loss is less than 0.001 which indicates that
+either the trained model has learned the original logits of the generating model
+close to perfect, or there is a bug which I need to investigate. The possibility
+of overfitting is ruled out, since the synthetic dataset is generated on the
+fly, and no two examples are the same.
+
+\printbibliography
+
+\end{document}

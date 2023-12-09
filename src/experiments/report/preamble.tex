@@ -1,0 +1,16 @@
+% !TeX root = main.tex
+\documentclass[sigplan,screen,natbib=false]{acmart}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{cleveref}
+\usepackage[datamodel=acmdatamodel,style=acmnumeric]{biblatex}
+\usepackage{amsmath}
+
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in the first column
+\pagestyle{plain} % removes running headers
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
