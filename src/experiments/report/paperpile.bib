@@ -1,0 +1,712 @@
+@INPROCEEDINGS{Landwehr2008-vw,
+  title      = {{Modeling interleaved hidden processes}},
+  author     = {Landwehr, Niels},
+  booktitle  = {{Proceedings of the 25th international conference on Machine
+                learning - ICML '08}},
+  publisher  = {ACM Press},
+  location   = {New York, New York, USA},
+  eventtitle = {the 25th international conference},
+  venue      = {Helsinki, Finland},
+  date       = {2008},
+  doi        = {10.1145/1390156.1390222},
+  isbn       = {9781605582054},
+  abstract   = {Hidden Markov models assume that observations in time series
+                data stem from some hidden process that can be compactly
+                represented as a Markov chain. We generalize this model by
+                assuming that the observed data stems from multiple hidden
+                processes, whose outputs interleave to form the sequence of
+                observations. Exact inference in this model is NP-hard. However,
+                a tractable and effective inference algorithm is obtained by
+                extending structured approximate inference methods used in
+                factorial hidden Markov models. The proposed model is evaluated
+                in an activity recognition domain, where multiple activities
+                interleave and together generate a stream of sensor
+                observations. It is shown to be more accurate than a standard
+                hidden Markov model in this domain.},
+  url        = {http://dx.doi.org/10.1145/1390156.1390222},
+  file       = {Workflows in Logs/Landwehr 2008 - Modeling interleaved hidden processes.pdf}
+}
+
+@INPROCEEDINGS{Minot2014-gn,
+  title      = {{Separation of interleaved Markov chains}},
+  author     = {Minot, Ariana and Lu, Yue M},
+  booktitle  = {{2014 48th Asilomar Conference on Signals, Systems and
+                Computers}},
+  publisher  = {IEEE},
+  eventtitle = {2014 48th Asilomar Conference on Signals, Systems and Computers},
+  venue      = {Pacific Grove, CA, USA},
+  pages      = {1757-1761},
+  date       = {2014-11},
+  doi        = {10.1109/acssc.2014.7094769},
+  issn       = {1058-6393},
+  isbn       = {9781479982974},
+  abstract   = {We study the problem of separating interleaved sequences from
+                discrete-time finite Markov chains. Previous work has considered
+                the setting where the Markov chains participating in the
+                interleaving have disjoint alphabets. In this work, we consider
+                the more general setting where the component chains' alphabets
+                can overlap. We formulate the problem as a hidden Markov model
+                (HMM) and develop a deinterleaving algorithm by modifying
+                classical HMM estimation techniques to take advantage of the
+                special structure of our deinterleaving problem. Numerical
+                results verify the effectiveness of the proposed method.},
+  url        = {http://dx.doi.org/10.1109/ACSSC.2014.7094769},
+  urldate    = {2023-05-30},
+  file       = {Workflows in Logs/Minot and Lu 2014 - Separation of interleaved Markov chains.pdf},
+  keywords   = {Markov processes;Hidden Markov models;Switches;Mathematical
+                model;Viterbi algorithm;Signal processing
+                algorithms;Indexes;Interleaved Markov processes;hidden Markov
+                process;statistical inference;structure learning}
+}
+
+@INPROCEEDINGS{Chen2019-fu,
+  title      = {{An experience report of generating load tests using
+                log-recovered workloads at varying granularities of user
+                behaviour}},
+  author     = {Chen, Jinfu and Shang, Weiyi and Hassan, Ahmed E and Wang, Yong
+                and Lin, Jiangbin},
+  booktitle  = {{2019 34th IEEE/ACM International Conference on Automated
+                Software Engineering (ASE)}},
+  publisher  = {IEEE},
+  eventtitle = {2019 34th IEEE/ACM International Conference on Automated
+                Software Engineering (ASE)},
+  venue      = {San Diego, CA, USA},
+  pages      = {669-681},
+  date       = {2019-11},
+  doi        = {10.1109/ase.2019.00068},
+  issn       = {2643-1572},
+  isbn       = {9781728125084},
+  abstract   = {Designing field-representative load tests is an essential step
+                for the quality assurance of large-scale systems. Practitioners
+                may capture user behaviour at different levels of granularity. A
+                coarse-grained load test may miss detailed user behaviour,
+                leading to a non-representative load test; while an extremely
+                fine-grained load test would simply replay user actions step by
+                step, leading to load tests that are costly to develop, execute
+                and maintain. Workload recovery is at core of these load tests.
+                Prior research often captures the workload as the frequency of
+                user actions. However, there exists much valuable information in
+                the context and sequences of user actions. Such richer
+                information would ensure that the load tests that leverage such
+                workloads are more field-representative. In this experience
+                paper, we study the use of different granularities of user
+                behaviour, i.e., basic user actions, basic user actions with
+                contextual information and user action sequences with contextual
+                information, when recovering workloads for use in the load
+                testing of large-scale systems. We propose three approaches that
+                are based on the three granularities of user behaviour and
+                evaluate our approaches on four subject systems, namely Apache
+                James, OpenMRS, Google Borg, and an ultra-large-scale industrial
+                system (SA) from Alibaba. Our results show that our approach
+                that is based on user action sequences with contextual
+                information outperforms the other two approaches and can
+                generate more representative load tests with similar throughput
+                and CPU usage to the original field workload (i.e., mostly
+                statistically insignificant or with small/trivial effect sizes).
+                Such representative load tests are generated only based on a
+                small number of clusters of users, leading to a low cost of
+                conducting/maintaining such tests. Finally, we demonstrate that
+                our approaches can detect injected users in the original field
+                workloads with high precision and recall. Our paper demonstrates
+                the importance of user action sequences with contextual
+                information in the workload recovery of large-scale systems.},
+  url        = {http://dx.doi.org/10.1109/ASE.2019.00068},
+  file       = {Workflows in Logs/Chen et al. 2019 - An experience report of generating load tests using log-recovered workloads at varying granularities of user behaviour.pdf},
+  keywords   = {Software engineering;Large-scale systems;Testing;Software
+                systems;Task analysis;Google;Workload recovery, Load tests,
+                Software log analysis, Software performance}
+}
+
+@INPROCEEDINGS{Xu2021-qm,
+  title      = {{Test coverage metrics for the network}},
+  author     = {Xu, Xieyang and Beckett, Ryan and Jayaraman, Karthick and
+                Mahajan, Ratul and Walker, David},
+  booktitle  = {{Proceedings of the 2021 ACM SIGCOMM 2021 Conference}},
+  publisher  = {ACM},
+  location   = {New York, NY, USA},
+  eventtitle = {SIGCOMM '21: ACM SIGCOMM 2021 Conference},
+  venue      = {Virtual Event USA},
+  date       = {2021-08-09},
+  doi        = {10.1145/3452296.3472941},
+  isbn       = {9781450383837},
+  url        = {http://dx.doi.org/10.1145/3452296.3472941},
+  file       = {Workflows in Logs/Xu et al. 2021 - Test coverage metrics for the network.pdf}
+}
+
+@ARTICLE{Briand2002-bu,
+  title        = {{A UML-based approach to system testing}},
+  author       = {Briand, Lionel and Labiche, Yvan},
+  journaltitle = {Software \& Systems Modeling},
+  publisher    = {Springer Science and Business Media LLC},
+  volume       = {1},
+  issue        = {1},
+  pages        = {10-42},
+  date         = {2002-09-01},
+  doi          = {10.1007/s10270-002-0004-8},
+  issn         = {1619-1374,1619-1366},
+  abstract     = {System testing is concerned with testing an entire system
+                  based on its specifications. In the context of
+                  object-oriented, UML development, this means that system test
+                  requirements are derived from UML analysis artifacts such as
+                  use cases, their corresponding sequence and collaboration
+                  diagrams, class diagrams, and possibly Object Constraint
+                  Language (OCL) expressions across all these artifacts. Our
+                  goal here is to support the derivation of functional system
+                  test requirements, which will be transformed into test cases,
+                  test oracles, and test drivers once we have detailed design
+                  information. In this paper, we describe a methodology in a
+                  practical way and illustrate it with an example. In this
+                  context, we address testability and automation issues, as the
+                  ultimate goal is to fully support system testing activities
+                  with high-capability tools.},
+  url          = {https://doi.org/10.1007/s10270-002-0004-8},
+  file         = {Workflows in Logs/Briand and Labiche 2002 - A UML-based approach to system testing.pdf},
+  language     = {en}
+}
+
+@INPROCEEDINGS{Chen2018-yg,
+  title      = {{An automated approach to estimating code coverage measures via
+                execution logs}},
+  author     = {Chen, Boyuan and Song, Jian and Xu, Peng and Hu, Xing and Jiang,
+                Zhen Ming (jack)},
+  booktitle  = {{Proceedings of the 33rd ACM/IEEE International Conference on
+                Automated Software Engineering}},
+  publisher  = {ACM},
+  location   = {New York, NY, USA},
+  eventtitle = {ASE '18: 33rd ACM/IEEE International Conference on Automated
+                Software Engineering},
+  venue      = {Montpellier France},
+  pages      = {305-316},
+  date       = {2018-09-03},
+  doi        = {10.1145/3238147.3238214},
+  isbn       = {9781450359375},
+  abstract   = {Software testing is a widely used technique to ensure the
+                quality of software systems. Code coverage measures are commonly
+                used to evaluate and improve the existing test suites. Based on
+                our industrial and open source studies, existing
+                state-of-the-art code coverage tools are only used during unit
+                and integration testing due to issues like engineering
+                challenges, performance overhead, and incomplete results. To
+                resolve these issues, in this paper we have proposed an
+                automated approach, called LogCoCo, to estimating code coverage
+                measures using the readily available execution logs. Using
+                program analysis techniques, LogCoCo matches the execution logs
+                with their corresponding code paths and estimates three
+                different code coverage criteria: method coverage, statement
+                coverage, and branch coverage. Case studies on one open source
+                system (HBase) and five commercial systems from Baidu and
+                systems show that: (1) the results of LogCoCo are highly
+                accurate (>96\% in seven out of nine experiments) under a
+                variety of testing activities (unit testing, integration
+                testing, and benchmarking); and (2) the results of LogCoCo can
+                be used to evaluate and improve the existing test suites. Our
+                collaborators at Baidu are currently considering adopting
+                LogCoCo and use it on a daily basis.},
+  series     = {ASE '18},
+  url        = {https://doi.org/10.1145/3238147.3238214},
+  urldate    = {2023-10-16},
+  file       = {Workflows in Logs/Chen et al. 2018 - An automated approach to estimating code coverage measures via execution logs.pdf},
+  keywords   = {software maintenance, test coverage, software testing, empirical
+                studies, logging code}
+}
+
+@INPROCEEDINGS{Borjesson2012-yr,
+  title      = {{Automated System Testing Using Visual GUI Testing Tools: A
+                Comparative Study in Industry}},
+  author     = {Borjesson, Emil and Feldt, Robert},
+  booktitle  = {{2012 IEEE Fifth International Conference on Software Testing,
+                Verification and Validation}},
+  eventtitle = {2012 IEEE Fifth International Conference on Software Testing,
+                Verification and Validation},
+  venue      = {Montreal, QC},
+  eventdate  = {2012},
+  pages      = {350-359},
+  date       = {2012},
+  doi        = {10.1109/ICST.2012.115},
+  abstract   = {Software companies are under continuous pressure to shorten time
+                to market, raise quality and lower costs. More automated system
+                testing could be instrumental in achieving these goals and in
+                recent years testing tools have been developed to automate the
+                interaction with software systems at the GUI level. However,
+                there is a lack of knowledge on the usability and applicability
+                of these tools in an industrial setting. This study evaluates
+                two tools for automated visual GUI testing on a real-world,
+                safety-critical software system developed by the company Saab
+                AB. The tools are compared based on their properties as well as
+                how they support automation of system test cases that have
+                previously been conducted manually. The time to develop and the
+                size of the automated test cases as well as their execution
+                times have been evaluated. Results show that there are only
+                minor differences between the two tools, one commercial and one
+                open-source, but, more importantly, that visual GUI testing is
+                an applicable technology for automated system testing with
+                effort gains over manual system test practices. The study
+                results also indicate that the technology has benefits over
+                alternative GUI testing techniques and that it can be used for
+                automated acceptance testing. However, visual GUI testing still
+                has challenges that must be addressed, in particular the script
+                maintenance costs and how to support robust test execution.},
+  url        = {https://ieeexplore.ieee.org/document/6200127},
+  file       = {Workflows in Logs/Borjesson and Feldt 2012 - Automated System Testing Using Visual GUI Testing Tools - A Comparative Study in Industry.pdf}
+}
+
+@ONLINE{Yadwadkar2010-gu,
+  title     = {{Discovery of application workloads from network file traces}},
+  author    = {Yadwadkar, Neeraja J and Bhattacharyya, Chiranjib and Gopinath, K},
+  booktitle = {{FAST}},
+  date      = {2010},
+  url       = {http://usenix.org/event/fast10/tech/full_papers/yadwadkar.pdf},
+  urldate   = {2023-11-22},
+  file      = {Workflows in Logs/Yadwadkar et al. 2010 - Discovery of application workloads from network file traces.pdf}
+}
+
+@INPROCEEDINGS{Tirmazi2020-kj,
+  title     = {{Borg: the Next Generation}},
+  author    = {Tirmazi, Muhammad and Barker, Adam and Deng, Nan and Haque, Md E
+               and Qin, Zhijing Gene and Hand, Steven and Harchol-Balter, Mor
+               and Wilkes, John},
+  booktitle = {{Proceedings of the Fifteenth European Conference on Computer
+               Systems (EuroSys'20)}},
+  publisher = {ACM},
+  location  = {Heraklion, Greece},
+  date      = {2020},
+  doi       = {10.1145/3342195.3387517},
+  isbn      = {9781450368827},
+  abstract  = {This paper analyzes a newly-published trace that covers 8
+               different Borg clusters for the month of May 2019. The trace
+               enables researchers to explore how scheduling works in
+               large-scale production compute clusters. We highlight how Borg
+               has evolved and perform a longitudinal comparison of the
+               newly-published 2019 trace against the 2011 trace, which has been
+               highly cited within the research community. Our findings show
+               that Borg features such as alloc sets are used for resource-heavy
+               workloads; automatic vertical scaling is effective;
+               job-dependencies account for much of the high failure rates
+               reported by prior studies; the workload arrival rate has
+               increased, as has the use of resource over-commitment; the
+               workload mix has changed, jobs have migrated from the free tier
+               into the best-effort batch tier; the workload exhibits an
+               extremely heavy-tailed distribution where the top 1\% of jobs
+               consume over 99\% of resources; and there is a great deal of
+               variation between different clusters.},
+  url       = {https://doi.org/10.1145/3342195.3387517},
+  keywords  = {data centers, cloud computing}
+}
+
+@INPROCEEDINGS{Reiss2012-dc,
+  title     = {{Heterogeneity and dynamicity of clouds at scale: Google trace
+               analysis}},
+  author    = {Reiss, Charles and Tumanov, Alexey and Ganger, Gregory R and
+               Katz, Randy H and Kozuch, Michael A},
+  booktitle = {{ACM Symposium on Cloud Computing (SoCC)}},
+  location  = {San Jose, CA, USA},
+  date      = {2012-10},
+  abstract  = {To better understand the challenges in developing effective
+               cloud-based resource schedulers, we analyze the first publicly
+               available trace data from a sizable multi-purpose cluster. The
+               most notable workload characteristic is heterogeneity: in
+               resource types (e.g., cores:RAM per machine) and their usage
+               (e.g., duration and resources needed). Such heterogeneity reduces
+               the effectiveness of traditional slot- and core-based scheduling.
+               Furthermore, some tasks are constrained as to the kind of machine
+               types they can use, increasing the complexity of resource
+               assignment and complicating task migration. The workload is also
+               highly dynamic, varying over time and most workload features, and
+               is driven by many short jobs that demand quick scheduling
+               decisions. While few simplifying assumptions apply, we find that
+               many longer-running jobs have relatively stable resource
+               utilizations, which can help adaptive resource schedulers.},
+  url       = {http://www.pdl.cmu.edu/PDL-FTP/CloudComputing/googletrace-socc2012.pdf}
+}
+
+@INPROCEEDINGS{Verma2015-dr,
+  title     = {{Large-scale cluster management at Google with Borg}},
+  author    = {Verma, Abhishek and Pedrosa, Luis and Korupolu, Madhukar R and
+               Oppenheimer, David and Tune, Eric and Wilkes, John},
+  booktitle = {{Proceedings of the European Conference on Computer Systems
+               (EuroSys'15)}},
+  location  = {Bordeaux, France},
+  date      = {2015},
+  doi       = {10.1145/2741948.2741964},
+  abstract  = {Google's Borg system is a cluster manager that runs hundreds of
+               thousands of jobs, from many thousands of different applications,
+               across a number of clusters each with up to tens of thousands of
+               machines. It achieves high utilization by combining admission
+               control, efficient task-packing, over-commitment, and machine
+               sharing with process-level performance isolation. It supports
+               high-availability applications with runtime features that
+               minimize fault-recovery time, and scheduling policies that reduce
+               the probability of correlated failures. Borg simplifies life for
+               its users by offering a declarative job specification language,
+               name service integration, real-time job monitoring, and tools to
+               analyze and simulate system behavior. We present a summary of the
+               Borg system architecture and features, important design
+               decisions, a quantitative analysis of some of its policy
+               decisions, and a qualitative examination of lessons learned from
+               a decade of operational experience with it.},
+  url       = {https://dl.acm.org/doi/10.1145/2741948.2741964}
+}
+
+@INPROCEEDINGS{Asiaee-T2018-px,
+  title      = {{Time Series Deinterleaving of DNS Traffic}},
+  author     = {Asiaee T., Amir and Goel, Hardik and Ghosh, Shalini and
+                Yegneswaran, Vinod and Banerjee, Arindam},
+  booktitle  = {{2018 IEEE Security and Privacy Workshops (SPW)}},
+  publisher  = {IEEE},
+  eventtitle = {2018 IEEE Security and Privacy Workshops (SPW)},
+  venue      = {San Francisco, CA},
+  pages      = {103-108},
+  date       = {2018-05},
+  doi        = {10.1109/spw.2018.00024},
+  isbn       = {9781538682760,9781538682777},
+  abstract   = {Stream deinterleaving is an important problem with various
+                applications in the cybersecurity domain. In this paper, we
+                consider the specific problem of deinterleaving DNS data streams
+                using machine-learning techniques, with the objective of
+                automating the extraction of malware domain sequences. We first
+                develop a generative model for user request generation and DNS
+                stream interleaving. Based on these we evaluate various
+                inference strategies for deinterleaving including augmented HMMs
+                and LSTMs on synthetic datasets. Our results demonstrate that
+                state-of-the-art LSTMs outperform more traditional augmented
+                HMMs in this application domain.},
+  url        = {https://ieeexplore.ieee.org/document/8424640},
+  urldate    = {2023-11-07},
+  file       = {Workflows in Logs/Asiaee T. et al. 2018 - Time Series Deinterleaving of DNS Traffic.pdf}
+}
+
+@SOFTWARE{Heek2023-nl,
+  type        = {software},
+  title       = {{flax: Flax is a neural network library for JAX that is
+                 designed for flexibility}},
+  author      = {Heek, Jonathan and Levskaya, Anselm and Oliver, Avital and
+                 Ritter, Marvin and Rondepierre, Bertrand and Steiner, Andreas
+                 and van Zee, Marc},
+  institution = {Github},
+  date        = {2023},
+  abstract    = {Flax is a neural network library for JAX that is designed for
+                 flexibility. - google/flax: Flax is a neural network library
+                 for JAX that is designed for flexibility.},
+  url         = {https://github.com/google/flax},
+  urldate     = {2023-11-22},
+  language    = {en},
+  version     = {0.7.5}
+}
+
+@SOFTWARE{Bradbury2018-jz,
+  type        = {software},
+  title       = {{jax: Composable transformations of Python+NumPy programs:
+                 differentiate, vectorize, JIT to GPU/TPU, and more}},
+  author      = {Bradbury, James and Frostig, Roy and Hawkins, Peter and
+                 Johnson, Matthew James and Leary, Chris and Maclaurin, Dougal
+                 and Necula, George and Paszke, Adam and VanderPlas, Jake and
+                 Wanderman-Milne, Skye and Zhang, Qiao},
+  institution = {Github},
+  date        = {2018},
+  abstract    = {Composable transformations of Python+NumPy programs:
+                 differentiate, vectorize, JIT to GPU/TPU, and more -
+                 google/jax: Composable transformations of Python+NumPy
+                 programs: differentiate, vectorize, JIT to GPU/TPU, and more},
+  url         = {https://github.com/google/jax},
+  urldate     = {2023-11-22},
+  language    = {en},
+  version     = {0.3.13}
+}
+
+@UNPUBLISHED{Kingma2014-jj,
+  title        = {{Adam: A method for stochastic optimization}},
+  author       = {Kingma, Diederik P and Ba, Jimmy},
+  journaltitle = {arXiv [cs.LG]},
+  date         = {2014-12-22},
+  eprint       = {1412.6980},
+  eprintclass  = {cs.LG},
+  abstract     = {We introduce Adam, an algorithm for first-order gradient-based
+                  optimization of stochastic objective functions, based on
+                  adaptive estimates of lower-order moments. The method is
+                  straightforward to implement, is computationally efficient,
+                  has little memory requirements, is invariant to diagonal
+                  rescaling of the gradients, and is well suited for problems
+                  that are large in terms of data and/or parameters. The method
+                  is also appropriate for non-stationary objectives and problems
+                  with very noisy and/or sparse gradients. The hyper-parameters
+                  have intuitive interpretations and typically require little
+                  tuning. Some connections to related algorithms, on which Adam
+                  was inspired, are discussed. We also analyze the theoretical
+                  convergence properties of the algorithm and provide a regret
+                  bound on the convergence rate that is comparable to the best
+                  known results under the online convex optimization framework.
+                  Empirical results demonstrate that Adam works well in practice
+                  and compares favorably to other stochastic optimization
+                  methods. Finally, we discuss AdaMax, a variant of Adam based
+                  on the infinity norm.},
+  url          = {http://arxiv.org/abs/1412.6980},
+  urldate      = {2023-11-08},
+  file         = {Workflows in Logs/Kingma and Ba 2014 - Adam - A method for stochastic optimization.pdf}
+}
+
+@INPROCEEDINGS{noauthor_2001-ac,
+  title     = {{PrefixSpan: Mining Sequential Patterns Efficiently by
+               Prefix-Projected Pattern Growth}},
+  booktitle = {{Proceedings of the 17th International Conference on Data
+               Engineering}},
+  publisher = {IEEE Computer Society},
+  location  = {USA},
+  pages     = {215},
+  date      = {2001-04-02},
+  doi       = {10.5555/876881.879716},
+  abstract  = {Abstract: Sequential pattern mining is an important data mining
+               problem with broad applications. It is challenging since one may
+               need to examine a combinatorially explosive number of possible
+               subsequence patterns. Most of the previously developed sequential
+               pattern mining methods follow the methodology of Apriori which
+               may substantially reduce the number of combinations to be
+               examined. However, Apriori still encounters problems when a
+               sequence database is large and/or when sequential patterns to be
+               mined are numerous and/or long. In this paper, we propose a novel
+               sequential pattern mining method, called PrefixSpan (i.e.,
+               Prefix-projected Sequential pattern mining), which explores
+               prefix-projection in sequential pattern mining. PrefixSpan mines
+               the complete set of patterns but greatly reduces the efforts of
+               candidate subsequence generation. Moreover, prefix-projection
+               substantially reduces the size of projected databases and leads
+               to efficient processing. Our performance study shows that
+               PrefixSpan outperforms both the Apriori-based GSP algorithm and
+               another recently proposed method, FreeSpan, in mining large
+               sequence databases.PrefixSpan},
+  series    = {ICDE '01},
+  url       = {https://dl.acm.org/doi/10.5555/876881.879716},
+  urldate   = {2023-11-22},
+  language  = {en}
+}
+
+@INPROCEEDINGS{Zhao2023-nh,
+  title      = {{Studying and complementing the use of identifiers in logs}},
+  author     = {Zhao, Jianchen and Tang, Yiming and Sunil, Sneha and Shang,
+                Weiyi},
+  booktitle  = {{2023 IEEE International Conference on Software Analysis,
+                Evolution and Reengineering (SANER)}},
+  publisher  = {IEEE},
+  eventtitle = {2023 IEEE International Conference on Software Analysis,
+                Evolution and Reengineering (SANER)},
+  venue      = {Taipa, Macao},
+  pages      = {97-107},
+  date       = {2023-03-01},
+  doi        = {10.1109/saner56733.2023.00019},
+  isbn       = {9781665452786},
+  abstract   = {Logs contain a large amount of curated run-time information
+                about the process of a software. Modern software systems have
+                become more complex and larger in scale. They are typically
+                executed in parallel or distributively, resulting in interleaved
+                software logs and making log analysis challenging. Despite
+                extensive research on automated logging analysis, none to our
+                knowledge focuses on the use of logs, and they rarely augment
+                logs to help with simpler analysis. Software log IDs are unique
+                identifiers that developers can use to group and filter log
+                entries. However, we found that, on average, only 21\% of
+                logging statements produce IDs, which can lead to loss of
+                information in the log file. We propose LTID, a static analysis
+                approach on log IDs, to remediate the aforementioned issue by
+                extracting a dependency relation between log statements from
+                source code. We build a dependency graph using static analysis
+                and compute the dominance relations of each logging statement.
+                We then propagate IDs to logs that do not contain them based on
+                the dependency graph. We studied 21 well-known Java open-source
+                software subjects and were able to inject IDs on average into
+                12\% of logs without IDs. Through an open coding process, we
+                also establish a categorization, which has a Cohen’s Kappa
+                agreement coefficient of 0.74, of the information gained to
+                better understand the relations recovered by the ID propagation
+                process.},
+  url        = {https://www.computer.org/csdl/proceedings-article/saner/2023/527800a097/1Nc0IKEXK1y},
+  urldate    = {2023-11-08},
+  language   = {en}
+}
+
+@ARTICLE{Chen2022-mw,
+  title        = {{A survey of software log instrumentation}},
+  author       = {Chen, Boyuan and Jiang, Zhen Ming (jack)},
+  journaltitle = {ACM computing surveys},
+  publisher    = {Association for Computing Machinery (ACM)},
+  location     = {New York, NY, USA},
+  volume       = {54},
+  issue        = {4},
+  pages        = {1-34},
+  date         = {2022-05-31},
+  doi          = {10.1145/3448976},
+  issn         = {0360-0300,1557-7341},
+  abstract     = {Log messages have been used widely in many software systems
+                  for a variety of purposes during software development and
+                  field operation. There are two phases in software logging: log
+                  instrumentation and log management. Log instrumentation refers
+                  to the practice that developers insert logging code into
+                  source code to record runtime information. Log management
+                  refers to the practice that operators collect the generated
+                  log messages and conduct data analysis techniques to provide
+                  valuable insights of runtime behavior. There are many open
+                  source and commercial log management tools available. However,
+                  their effectiveness highly depends on the quality of the
+                  instrumented logging code, as log messages generated by
+                  high-quality logging code can greatly ease the process of
+                  various log analysis tasks (e.g., monitoring, failure
+                  diagnosis, and auditing). Hence, in this article, we conducted
+                  a systematic survey on state-of-the-art research on log
+                  instrumentation by studying 69 papers between 1997 and 2019.
+                  In particular, we have focused on the challenges and proposed
+                  solutions used in the three steps of log instrumentation: (1)
+                  logging approach; (2) logging utility integration; and (3)
+                  logging code composition. This survey will be useful to DevOps
+                  practitioners and researchers who are interested in software
+                  logging.},
+  url          = {https://doi.org/10.1145/3448976},
+  file         = {Workflows in Logs/Chen and Jiang 2022 - A survey of software log instrumentation.pdf},
+  keywords     = {Systematic survey, instrumentation, software logging},
+  language     = {en}
+}
+
+@REPORT{Reiss2011-oz,
+  type        = {resreport},
+  title       = {{Google cluster-usage traces: format + schema}},
+  author      = {Reiss, Charles and Wilkes, John and Hellerstein, Joseph L},
+  institution = {Google Inc.},
+  location    = {Mountain View, CA, USA},
+  date        = {2011-11},
+  note        = {Revised 2014-11-17 for version 2.1. Posted at
+                 https://github.com/google/cluster-data},
+  file        = {Workflows in Logs/Reiss et al. 2011 - untitled.html}
+}
+
+@MISC{Wilkes2011-yj,
+  title    = {{More Google cluster data}},
+  author   = {Wilkes, John},
+  location = {Mountain View, CA, USA},
+  date     = {2011-11},
+  note     = {Posted at
+              http://googleresearch.blogspot.com/2011/11/more-google-cluster-data.html.},
+  file     = {Workflows in Logs/Wilkes 2011 - more-google-cluster-data.html}
+}
+
+@UNPUBLISHED{Le2023-bl,
+  title        = {{Log parsing with prompt-based few-shot learning}},
+  author       = {Le, Van-Hoang and Zhang, Hongyu},
+  journaltitle = {arXiv [cs.SE]},
+  date         = {2023-02-14},
+  eprint       = {2302.07435},
+  eprintclass  = {cs.SE},
+  abstract     = {Logs generated by large-scale software systems provide crucial
+                  information for engineers to understand the system status and
+                  diagnose problems of the systems. Log parsing, which converts
+                  raw log messages into structured data, is the first step to
+                  enabling automated log analytics. Existing log parsers extract
+                  the common part as log templates using statistical features.
+                  However, these log parsers often fail to identify the correct
+                  templates and parameters because: 1) they often overlook the
+                  semantic meaning of log messages, and 2) they require
+                  domain-specific knowledge for different log datasets. To
+                  address the limitations of existing methods, in this paper, we
+                  propose LogPPT to capture the patterns of templates using
+                  prompt-based few-shot learning. LogPPT utilises a novel prompt
+                  tuning method to recognise keywords and parameters based on a
+                  few labelled log data. In addition, an adaptive random
+                  sampling algorithm is designed to select a small yet diverse
+                  training set. We have conducted extensive experiments on 16
+                  public log datasets. The experimental results show that LogPPT
+                  is effective and efficient for log parsing.},
+  url          = {http://arxiv.org/abs/2302.07435},
+  file         = {Workflows in Logs/Le and Zhang 2023 - Log parsing with prompt-based few-shot learning.pdf}
+}
+
+@INPROCEEDINGS{Khan2022-me,
+  title      = {{Guidelines for assessing the accuracy of log message template
+                identification techniques}},
+  author     = {Khan, Zanis Ali and Shin, Donghwan and Bianculli, Domenico and
+                Briand, Lionel},
+  booktitle  = {{Proceedings of the 44th International Conference on Software
+                Engineering}},
+  publisher  = {ACM},
+  location   = {New York, NY, USA},
+  eventtitle = {ICSE '22: 44th International Conference on Software Engineering},
+  venue      = {Pittsburgh Pennsylvania},
+  pages      = {1095-1106},
+  date       = {2022-05-21},
+  doi        = {10.1145/3510003.3510101},
+  issn       = {1558-1225},
+  abstract   = {Log message template identification aims to convert raw logs
+                containing free-formed log messages into structured logs to be
+                processed by automated log-based analysis, such as anomaly
+                detection and model inference. While many techniques have been
+                proposed in the literature, only two recent studies provide a
+                comprehensive evaluation and comparison of the techniques using
+                an established benchmark composed of real-world logs.
+                Nevertheless, we argue that both studies have the following
+                issues: (1) they used different accuracy metrics without
+                comparison between them, (2) some ground-truth (oracle)
+                templates are incorrect, and (3) the accuracy evaluation results
+                do not provide any information regarding incorrectly identified
+                templates. In this paper, we address the above issues by
+                providing three guidelines for assessing the accuracy of log
+                template identification techniques: (1) use appropriate accuracy
+                metrics, (2) perform oracle template correction, and (3) perform
+                analysis of incorrect templates. We then assess the application
+                of such guidelines through a comprehensive evaluation of 14
+                existing template identification techniques on the established
+                benchmark logs. Results show very different insights than
+                existing studies and in particular a much less optimistic
+                outlook on existing techniques.},
+  url        = {http://dx.doi.org/10.1145/3510003.3510101},
+  file       = {Workflows in Logs/Khan et al. 2022 - Guidelines for assessing the accuracy of log message template identification techniques.pdf},
+  keywords   = {Measurement;Analytical models;Benchmark testing;Anomaly
+                detection;Guidelines;Software engineering;logs;template
+                identification;metrics}
+}
+
+@ARTICLE{Baum1970-pd,
+  title        = {{A maximization technique occurring in the statistical
+                  analysis of probabilistic functions of Markov chains}},
+  author       = {Baum, Leonard E and Petrie, Ted and Soules, George and Weiss,
+                  Norman},
+  journaltitle = {The annals of mathematical statistics},
+  publisher    = {Institute of Mathematical Statistics},
+  volume       = {41},
+  issue        = {1},
+  pages        = {164-171},
+  date         = {1970-02},
+  doi          = {10.1214/aoms/1177697196},
+  issn         = {0003-4851,2168-8990},
+  url          = {http://www.jstor.org/stable/2239727},
+  file         = {Workflows in Logs/Baum et al. 1970 - A maximization technique occurring in the statistical analysis of probabilistic functions of Markov chains.pdf}
+}
+
+@INPROCEEDINGS{Wu2017-wm,
+  title      = {{Structural event detection from log messages}},
+  author     = {Wu, Fei and Anchuri, Pranay and Li, Zhenhui},
+  booktitle  = {{Proceedings of the 23rd ACM SIGKDD International Conference on
+                Knowledge Discovery and Data Mining}},
+  publisher  = {ACM},
+  location   = {New York, NY, USA},
+  eventtitle = {KDD '17: The 23rd ACM SIGKDD International Conference on
+                Knowledge Discovery and Data Mining},
+  venue      = {Halifax NS Canada},
+  date       = {2017-08-04},
+  doi        = {10.1145/3097983.3098124},
+  isbn       = {9781450348874},
+  url        = {http://dx.doi.org/10.1145/3097983.3098124},
+  file       = {Workflows in Logs/Wu et al. 2017 - Structural event detection from log messages.pdf}
+}
+
+@INBOOK{Aharon2009-rc,
+  title     = {{One graph is worth a thousand logs: Uncovering hidden structures
+               in massive system event logs}},
+  author    = {Aharon, Michal and Barash, Gilad and Cohen, Ira and Mordechai,
+               Eli},
+  booktitle = {{Machine Learning and Knowledge Discovery in Databases}},
+  publisher = {Springer Berlin Heidelberg},
+  location  = {Berlin, Heidelberg},
+  pages     = {227-243},
+  date      = {2009},
+  doi       = {10.1007/978-3-642-04180-8_32},
+  issn      = {0302-9743,1611-3349},
+  isbn      = {9783642041792,9783642041808},
+  series    = {Lecture notes in computer science},
+  url       = {http://dx.doi.org/10.1007/978-3-642-04180-8_32},
+  file      = {Workflows in Logs/Aharon et al. 2009 - One graph is worth a thousand logs - Uncovering hidden structures in massive system event logs.pdf}
+}
