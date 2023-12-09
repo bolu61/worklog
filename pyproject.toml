@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "worklog"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "bolu", email = "bolu@bolupi.me" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "prefixspan @ git+https://github.com/bolu61/prefixspan@v0.1.5-alpha",
+  "jax==0.4.20",
+  "flax==0.7.5",
+  "optax==0.1.7",
+  "scipy==1.11.4",
+  "cliffs-delta==1.0.0",
+  "tqdm==4.66.1",
+]
+
+[project.urls]
+Documentation = "https://github.com/unknown/worklog#readme"
+Issues = "https://github.com/unknown/worklog/issues"
+Source = "https://github.com/unknown/worklog"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pyright==1.1.337",
+  "ruff==0.1.6",
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+format = "ruff format {args:.}"
+typecheck = "pyright"
+lint = [
+  "ruff check --fix {args:.}",
+  "format",
+  "typecheck",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--import-mode=importlib",
+]
+
+[tool.ruff]
+target-version = "py311"
+lint.select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pyright]
+useLibraryCodeForTypes = false
+
+[tool.coverage.run]
+source_pkgs = ["worklog", "tests"]
+branch = true
+parallel = true
+
+[tool.coverage.paths]
+worklog = ["src/worklog", "*/worklog/src/worklog"]
+tests = ["tests", "*/worklog/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
