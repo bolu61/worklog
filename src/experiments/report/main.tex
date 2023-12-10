@@ -4,41 +4,51 @@
 \title{Project Final Report: Generating Realistic Workloads}
 \author{JianChen Zhao}
 \email{jianchen.zhao@uwaterloo.ca}
-
 \addbibresource{paperpile.bib}
 
 \begin{document}
+
+\begin{abstract}
+% todo
+\end{abstract}
 
 \maketitle
 
 \section{Introduction}
 
-In this project, I have set to model the event log generation processes in
-large-scale software systems to improve realistic workload synthesis for system
-load testing.
+In today's dynamic and interconnected digital landscape, where user expectations for speed and reliability are higher than ever, workload testing is indispensable. For instance, Ticketmaster, a well-known ticket vendor, faced technical difficulties such as server crashes and increased latency during a pre-sale event for Taylor Swift's 2022 tour. Despite preregistrations for the event, their system faltered due to inadequate load testing \cite{Reuters2022-dc}. In contrast, Amazon, during Prime Day 2023, managed to handle an astounding number of requests, including 764 petabytes of EBS data transfer, over 15.35 trillion requests, 830 CloudTrail events, 500 million CloudFront HTTP requests per minute \cite{Barr2023-wr}. This feat can not be achieved without rigorous load testing.
+
+As software systems become more complex and are deployed on increasingly diverse platforms, assessing their robustness under varying workloads becomes paramount. Among the various system testing paradigms, workload testing emerges as a critical aspect, focusing on the system's ability to handle different levels of expected user activity. This form of testing empirically guarantees that a software application can meet its performance objectives under realistic working conditions.
+
+Load testing involves simulating different scenarios and conditions that mimic the actual usage patterns and demands the software may encounter in a production environment. Subjecting the system to workloads, including typical and peak loads, reduces system failure risks while additionally helping in identifying potential bottlenecks, vulnerabilities, or performance degradation that may not arise in functional tests.
+
+The most basic form of load testing consists of running the system against a manually collected dataset of user actions, referred to as a workload. This approach requires extensive tooling of the deployed system to capture the user actions and ample storage to accommodate the large number of workloads necessary to capture the variance in user actions.
 
 \subsection{Background}
 
-Event log-producing workloads can be seen as an interleaved Markov process
-(IMP). Such a process can be modeled with an interleaved hidden Markov model
-(HMM). It combines a mixture of individual HMM, each modeling a single
-independent process. In load testing, tasks can be modeled by such a process. We
-can generate new workloads based on the processes using an interleaved HMM
-trained on those processes, leading to realistic yet high-variance synthetic
-workloads.
+Event log-producing workloads can be seen as an interleaved Markov process (IMP). Such a process can be modeled with an interleaved hidden Markov model (HMM). It combines a mixture of individual HMM, each modeling a single independent process. In load testing, tasks can be modeled by such a process. We can generate new workloads based on the processes using an interleaved HMM trained on those processes, leading to realistic yet high-variance synthetic workloads.
 
-\section{Implementing Interleaved HMM}
+\subsection{Related Work}
 
-I have implemented an interleaved HMM using the Flax\cite{Heek2023-nl} framework
-and in this section, I will go over the implementation details and how it is
-trained.
+\subsubsection{Load Testing}
 
-Consider a single HMM \(\mu\) with states \(1, 2, ...,n\) in \(S_\mu\). To fit
-this HMM on a hidden process, we can maximize the likelihood \(\mathcal{L}(\mu |
-\seq{y_t}_t) = p_\mu(\seq{y_t}_t)\) of \(\mu\) given observations from the
-hidden process \(\seq{y_t}_t = \seq{y_1, y_2, ..., y_t}\). Since an observation
-\(y_t\) is only dependant on the current state \(x_t\), we can write this
-probability like so:
+\subsubsection{Log Mining}
+
+\subsubsection{Pattern Mining}
+
+\subsection{Contributions}
+
+\section{Modeling Software Processes}
+
+\subsection{Markov Chains}
+
+\subsection{Hidden Markov Chains (HMM)}
+
+\subsection{Interleaved HMM}
+
+I have implemented an interleaved HMM using the Flax\cite{Heek2023-nl} framework and in this section, I will go over the implementation details and how it is trained.
+
+Consider a single HMM \(\mu\) with states \(1, 2, ...,n\) in \(S_\mu\). To fit this HMM on a hidden process, we can maximize the likelihood \(\mathcal{L}(\mu | \seq{y_t}_t) = p_\mu(\seq{y_t}_t)\) of \(\mu\) given observations from the hidden process \(\seq{y_t}_t = \seq{y_1, y_2, ..., y_t}\). Since an observation \(y_t\) is only dependant on the current state \(x_t\), we can write this probability like so:
 \begin{equation}\label{eq:likelihood}
     p_\mu(\seq{y_t}_t) = \sum_{x_t} p_\mu(x_t, \seq{y_t}_t),
 \end{equation}
@@ -50,27 +60,17 @@ where it can be demonstrated by recursively applying the chain rule that for \(1
         p_\mu(y_t|x_t) \sum_{x_{t-1}} p_\mu(x_t|x_{t-1}) p_\mu(x_{t-1}, \seq{y_t}_{t-1}).
     \end{multlined}
 \end{equation}
+and with the base case
 \begin{equation}\label{eq:max_likelihood}
     p_\mu(x_0, \seq{}) = p_\mu(x_0)
 \end{equation}
-\(p_\mu(y_t|x_t)\) is the emission probability of \(\mu\), \(p_\mu(x_t | x_t)\)
-is the transition probability and \(p_\mu(x_0)\) is the prior or stationary
-probability of the states. Then, the fitted model \(\hat{\mu}\) is one that maximizes \cref{eq:likelihood}
+\(p_\mu(y_t|x_t)\) is the emission probability of \(\mu\), \(p_\mu(x_t | x_t)\) is the transition probability and \(p_\mu(x_0)\) is the prior or stationary probability of the states. Then, the fitted model \(\hat{\mu}\) is one that maximizes \cref{eq:likelihood}
 \begin{equation}
     \label{eq:argmax_observation}
     \hat{\mu} = \argmax_{\mu} p_\mu(\seq{y_t}_t).
 \end{equation}
 
-This recursive equation can be solved using the forward algorithm described in
-\cref{alg:forward}. The forward algorithm has space complexity \(O(n)\)  and
-time complexity \(O(nT)\) where \(n\) is the number of possible states and \(T\)
-is the length of the input sequence. In the context of interleaved HMM \(\mu\),
-there are \(K\) individual HMMs \(\mu_k\), the state of \(\mu\) must encode the
-states of all \(\mu_k\). Thus, no matter the encoding, the time and space
-complexity of the forward algorithm will be exponential with respect to \(K\).
-In fact, training the interleaved HMM is NP-hard\cite{Landwehr2008-vw}.
-\citeauthor{Landwehr2008-vw} shows an alternative approximate algorithm for
-training, but I have yet to implement it.
+This recursive equation can be solved using the forward algorithm described in \cref{alg:forward}. The forward algorithm has space complexity \(O(n)\)  and time complexity \(O(nT)\) where \(n\) is the number of possible states and \(T\) is the length of the input sequence. In the context of interleaved HMM \(\mu\), there are \(K\) individual HMMs \(\mu_k\), the state of \(\mu\) must encode the states of all \(\mu_k\). Thus, no matter the encoding, the time and space complexity of the forward algorithm will be exponential with respect to \(K\). In fact, training the interleaved HMM is NP-hard\cite{Landwehr2008-vw}. \citeauthor{Landwehr2008-vw} shows an alternative approximate algorithm for training, but I have yet to implement it.
 \begin{algorithm}[H]
     \caption{The forward algorithm.}\label{alg:forward}
     \begin{algorithmic}[1]
@@ -88,39 +88,50 @@ training, but I have yet to implement it.
     \end{algorithmic}
 \end{algorithm}
 
-Since the forward algorithm's gradient can be automatically computed by
-Jax\cite{Bradbury2018-jz}, on which Flax is based, \cref{eq:argmax_observation}
-can be found using gradient descent. Specifically, I used the
-Adam\cite{Kingma2014-jj} optimizer on a synthetic dataset described in
-\cref{sec:dataset}. I implemented the forward algorithm in \(\log\) space for
-better numerical stability and thus the optimized loss is the negative
-log-likelihood:
+Since the forward algorithm's gradient can be automatically computed by Jax\cite{Bradbury2018-jz}, on which Flax is based, \cref{eq:argmax_observation} can be found using gradient descent. Specifically, I used the Adam\cite{Kingma2014-jj} optimizer on a synthetic dataset described in \cref{sec:dataset}. I implemented the forward algorithm in \(\log\) space for better numerical stability and thus the optimized loss is the negative log-likelihood:
 \begin{equation}
     \label{eq:neg_log_likelihood}
     \argmin_{\mu} - \log P(y_{1..T} | \mu).
 \end{equation}
 
-\section{Exploring Google Borg Dataset}\label{sec:dataset}
+\section{Approach}
 
-Because the current implementation of the forward algorithm can not handle
-complex data using a reasonable amount of resources, I have not trained the
-interleaved HMM on the Google Borg dataset. This dataset contains logs generated
-from thousands of machines, thus thousands of possible Markov processes.
+\section{Experimental Setup}
 
-Instead, I've spent time designing a synthetic dataset using the implemented
-interleaved HMM with transition weights sampled from a beta distribution
-\(\text{Beta}(\alpha=0.1, \beta=0.9)\).  The number of states and subchains in
-the generating model can be customized. This dataset generates interleaved
-sequences over an alphabet on the fly. To test my implementation, I trained a
-different HMM with randomly initialized logits for the transition and emission
-probabilities.
+\subsection{Research Questions}
 
-Once trained, I measured the loss of the model, specifically the choice state
-variable. I have found that the loss is less than 0.001 which indicates that
-either the trained model has learned the original logits of the generating model
-close to perfect, or there is a bug which I need to investigate. The possibility
-of overfitting is ruled out, since the synthetic dataset is generated on the
-fly, and no two examples are the same.
+\begin{researchquestions}
+    \item\label{rq:performance} How does our approach perform for real workloads?
+    \item\label{rq:ablation} How does the approach perform under different settings?
+\end{researchquestions}
+
+\subsection{Datasets}\label{sec:dataset}
+
+\subsubsection{Apache James}
+
+\subsubsection{OpenMRS}
+
+\subsubsection{Google Borg Trace Version 2}
+
+\section{Results}
+
+\subsection*{\cref{rq:performance}: How does our approach perform for real workloads?}
+
+\subsection*{\cref{rq:ablation}: How does our approach perform under different settings?}
+
+\section{Discussion}
+
+\subsection{Threats to Validity}
+
+\subsubsection{Internal Validity}
+
+\subsubsection{External Validity}
+
+\subsubsection{Construct Validity}
+
+\subsection{Future Work}
+
+\section{Conclusion}
 
 \printbibliography
 
