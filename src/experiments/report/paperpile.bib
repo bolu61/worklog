@@ -1,3 +1,54 @@
+@INPROCEEDINGS{Shang2015-gj,
+  title      = {{Automated detection of performance regressions using regression
+                models on clustered performance counters}},
+  author     = {Shang, Weiyi and Hassan, Ahmed E and Nasser, Mohamed and Flora,
+                Parminder},
+  booktitle  = {{Proceedings of the 6th ACM/SPEC International Conference on
+                Performance Engineering}},
+  publisher  = {ACM},
+  location   = {New York, NY, USA},
+  eventtitle = {ICPE'15: ACM/SPEC International Conference on Performance
+                Engineering},
+  venue      = {Austin Texas USA},
+  date       = {2015-01-31},
+  doi        = {10.1145/2668930.2688052},
+  isbn       = {9781450332484},
+  abstract   = {Performance testing is conducted before deploying system updates
+                in order to ensure that the performance of large software
+                systems did not degrade (i.e., no performance regressions).
+                During such testing, thousands of performance counters are
+                collected. However, comparing thousands of performance counters
+                across versions of a software system is very time consuming and
+                error-prone. In an effort to automate such analysis, model-based
+                performance regression detection approaches build a limited
+                number (i.e., one or two) of models for a limited number of
+                target performance counters (e.g., CPU or memory) and leverage
+                the models to detect performance regressions. Such model-based
+                approaches still have their limitations since selecting the
+                target performance counters is often based on experience or gut
+                feeling. In this paper, we propose an automated approach to
+                detect performance regressions by analyzing all collected
+                counters instead of focusing on a limited number of target
+                counters. We first group performance counters into clusters to
+                determine the number of performance counters needed to truly
+                represent the performance of a system. We then perform
+                statistical tests to select the target performance counters, for
+                which we build regression models. We apply the regression models
+                on new version of the system to detect performance regressions.
+                We perform two case studies on two large systems: one
+                open-source system and one enterprise system. The results of our
+                case studies show that our approach can group a large number of
+                performance counters into a small number of clusters. Our
+                approach can successfully detect both injected and real-life
+                performance regressions in the case studies. In addition, our
+                case studies show that our approach outperforms traditional
+                approaches for analyzing performance counters. Our approach has
+                been adopted in industrial settings to detect performance
+                regressions on a daily basis.},
+  url        = {https://dl.acm.org/doi/abs/10.1145/2668930.2688052},
+  file       = {Workflows in Logs/Shang et al. 2015 - Automated detection of performance regressions using regression models on clustered performance counters.pdf}
+}
+
 @INPROCEEDINGS{Landwehr2008-vw,
   title      = {{Modeling interleaved hidden processes}},
   author     = {Landwehr, Niels},
