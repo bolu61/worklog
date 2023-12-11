@@ -1,7 +1,7 @@
 % !TeX root = main.tex
 \input{preamble}
 
-\title{Project Final Report: Generating Realistic Workloads}
+\title{Project Final Report: Modeling and Generating Realistic Workloads}
 \author{JianChen Zhao}
 \email{jianchen.zhao@uwaterloo.ca}
 \addbibresource{paperpile.bib}
@@ -16,31 +16,43 @@
 
 \section{Introduction}
 
-In today's dynamic and interconnected digital landscape, where user expectations for speed and reliability are higher than ever, workload testing is indispensable. For instance, Ticketmaster, a well-known ticket vendor, faced technical difficulties such as server crashes and increased latency during a pre-sale event for Taylor Swift's 2022 tour. Despite preregistrations for the event, their system faltered due to inadequate load testing \cite{Reuters2022-dc}. In contrast, Amazon, during Prime Day 2023, managed to handle an astounding number of requests, including 764 petabytes of EBS data transfer, over 15.35 trillion requests, 830 CloudTrail events, 500 million CloudFront HTTP requests per minute \cite{Barr2023-wr}. This feat can not be achieved without rigorous load testing.
+In today's dynamic and interconnected digital landscape, where user expectations for speed and reliability are higher than ever, workload testing is indispensable. For instance, Ticketmaster, a well-known ticket vendor, faced technical difficulties such as server crashes and increased latency during a pre-sale event for Taylor Swift's 2022 tour. Despite preregistrations for the event, their system faltered due to inadequate load testing \cite{Reuters2022-dc}. In contrast, during Prime Day 2023, Amazon handled an astounding number of requests, including 764 petabytes of EBS data transfer, over 15.35 trillion requests, 830 CloudTrail events, and 500 million CloudFront HTTP requests per minute. Amazon would not have achieved such a feat without rigorous load testing\cite{Barr2023-wr}.
 
-As software systems become more complex and are deployed on increasingly diverse platforms, assessing their robustness under varying workloads becomes paramount. Among the various system testing paradigms, workload testing emerges as a critical aspect, focusing on the system's ability to handle different levels of expected user activity. This form of testing empirically guarantees that a software application can meet its performance objectives under realistic working conditions.
-
-Load testing involves simulating different scenarios and conditions that mimic the actual usage patterns and demands the software may encounter in a production environment. Subjecting the system to workloads, including typical and peak loads, reduces system failure risks while additionally helping in identifying potential bottlenecks, vulnerabilities, or performance degradation that may not arise in functional tests.
-
-The most basic form of load testing consists of running the system against a manually collected dataset of user actions, referred to as a workload. This approach requires extensive tooling of the deployed system to capture the user actions and ample storage to accommodate the large number of workloads necessary to capture the variance in user actions.
+As software systems become more complex and are deployed on increasingly diverse platforms, assessing their robustness under varying workloads becomes paramount. Large-scale software systems like cloud services are deeply embedded into today's economy. Many businesses's critical operations rely on such software. To illustrate, the global end-user spending in public cloud services is more than half a trillion USD in 2023\cite{UnknownUnknown-aj}. For operators of such large-scale software systems, a failure can result in significant financial loss and impact business worldwide\cite{LuuUnknown-mo}; Facebook, for example, lost an estimated 90 million USD to a 14-hour outage caused by misconfigured DNS\cite{AtlassianUnknown-sw}. Interestingly, such failures can not be attributed to functional bugs\cite{Weyuker2000-gw}. It is, therefore, crucial that systems are rigorously tested as a whole.
 
 \subsection{Background}
 
-Event log-producing workloads can be seen as an interleaved Markov process (IMP). Such a process can be modeled with an interleaved hidden Markov model (HMM). It combines a mixture of individual HMM, each modeling a single independent process. In load testing, tasks can be modeled by such a process. We can generate new workloads based on the processes using an interleaved HMM trained on those processes, leading to realistic yet high-variance synthetic workloads.
+Among the various system testing paradigms, load testing emerges as a critical aspect, focusing on the system's ability to handle different levels of expected user activity. This form of testing empirically guarantees that a software application can meet its performance objectives under realistic working conditions.
+
+Load testing involves simulating different scenarios and conditions that mimic the actual usage patterns and demands the software may encounter in a production environment. Subjecting the system to \emph{workloads}, including typical and peak loads, reduces system failure risks while helping identify potential bottlenecks, vulnerabilities, or performance degradation that may not arise in functional tests \cite{Syer2017-ek, Shang2015-gj, Cohen2005-mn, Hassan2008-nj, Chen2016-bo}.
+
+The most basic form of load testing consists of replaying the system against a manually collected dataset of user actions. This approach requires extensive tooling of the deployed system to capture the user actions and ample storage to accommodate the large number of workloads necessary to capture the variance in user actions. Many prior works have explored the automatically recovering workloads to work around these issues.
+
+However, automatically generating workloads is no trivial task. There are two main challenges. First, the generated workload must be realistic. The action patterns in the workload must be representative of actual field observations. This property is essential to the usefulness of load testing. Testing on unrealistic data cannot ensure that the system under test can handle actual user actions. Second, real user actions have high variance; that is, there is a diverse number of action patterns in production environments. Hence, automatic workload generation techniques must balance the variance and representativeness of the recovered workload.
 
 \subsection{Related Work}
 
-\subsubsection{Load Testing}
+Prior works on workload generation have explored automatically recovering workloads from various readily available sources, which are resampled for replay.
 
-\subsubsection{Log Mining}
+Many proposed approaches abstract away user behaviors in workload and only consider specific metrics. This reduces the information needed to be stored for replay. \cite{Shang2015-gj, Cohen2005-mn} use CPU usage metrics for high-level representation of user behaviors. Similarly, \cite{Haghdoost2017-bc, Yadwadkar2010-ml, Busch2015-yo, Seo2014-xv} characterize the load by the I/O usage, while \cite{Cortez2017-nc} looks at other system resource usage to model the workloads. While such coarse-grained approaches are efficient and easy to maintain, information about essential characteristics of the load might be lost.
 
-\subsubsection{Pattern Mining}
+As demonstrated in \cite{Cohen2005-mn}, more precise characterization of workloads may lead to better performance. \cite{Yadwadkar2010-ml} explored using a hidden Markov model to find patterns of user behaviors and found that only a small amount of data is required to construct an adequate model of the user behaviors.
+
+To balance the granularity of the recovered workloads, \cite{Syer2017-ek, Vogele2018-zz, Summers2016-jj, Xi2011-ki, Hassan2008-nj} distinguishes different user behaviors by clustering user actions extracted from event logs or system traces. \cite{Chen2019-fu} adds to this approach by also considering sequences of user actions and their context, helping find more representative user behaviors without sacrificing the variance of the recovered workloads and introducing some adaptability to the approach. While this approach can achieve a good balance, it suffers from two problems. First, the approach clusters users based on their behaviors to sample actions and action sequences of a recovered workload using representative users. In effect, the diversity of the generated workload is restricted by the size of the source used to recover the initial workload. Second, event logs and traces are noisy. Actions are thus recovered by filtering on some user identifiers. However, those identifiers are not always present, and the recovered actions may be incomplete \cite{Zhao2023-nh}.
 
 \subsection{Contributions}
 
-\section{Modeling Software Processes}
+To tackle the challenges above, we propose an extensible model of user behaviors based on Hidden Markov Models (HMM) to allow dynamic generation of workloads, unconstrained by the size of the initial recovered workload. We evaluate our model and demonstrate its performance and generalizability. We also propose directions for future improvements.
+
+\subsection{Organization}
+
+We present our model in detail in \cref{sec:modeling_processes} while highlighting challenges in training such a model. We show in \cref{sec:approach} how it can be integrated to generate workloads dynamically. We evaluate it in \cref{sec:experimental_setup,sec:results}, and discuss tradeoffs and potential improvements in \cref{sec:discussion}. Finally, we conclude in \cref{sec:conclusion}.
+
+\section{Modeling Software Processes}\label{sec:modeling_processes}
 
 \subsection{Markov Chains}
+
+The production of event logs is a stochastic process: each event is an element of a sequence indexed by time. Every time a software produces an event, it must go through a state transition following its control flow. However, Such a process can be modeled with an interleaved hidden Markov model (HMM). It combines a mixture of individual HMM, each modeling a single independent process. In load testing, tasks can be modeled by such a process. We can generate new workloads based on the processes using an interleaved HMM trained on those processes, leading to realistic yet high-variance synthetic workloads.
 
 \subsection{Hidden Markov Chains (HMM)}
 
@@ -70,7 +82,7 @@ and with the base case
     \hat{\mu} = \argmax_{\mu} p_\mu(\seq{y_t}_t).
 \end{equation}
 
-This recursive equation can be solved using the forward algorithm described in \cref{alg:forward}. The forward algorithm has space complexity \(O(n)\)  and time complexity \(O(nT)\) where \(n\) is the number of possible states and \(T\) is the length of the input sequence. In the context of interleaved HMM \(\mu\), there are \(K\) individual HMMs \(\mu_k\), the state of \(\mu\) must encode the states of all \(\mu_k\). Thus, no matter the encoding, the time and space complexity of the forward algorithm will be exponential with respect to \(K\). In fact, training the interleaved HMM is NP-hard\cite{Landwehr2008-vw}. \citeauthor{Landwehr2008-vw} shows an alternative approximate algorithm for training, but I have yet to implement it.
+This recursive equation can be solved using the forward algorithm described in \cref{alg:forward}. The forward algorithm has space complexity \(O(n)\)  and time complexity \(O(nT)\) where \(n\) is the number of possible states and \(T\) is the length of the input sequence. In the context of interleaved HMM \(\mu\), there are \(K\) individual HMMs \(\mu_k\), the state of \(\mu\) must encode the states of all \(\mu_k\). Thus, no matter the encoding, the time and space complexity of the forward algorithm will be exponential with respect to \(K\). In fact, training the interleaved HMM is an intractable problem\cite{Landwehr2008-vw}.
 \begin{algorithm}[H]
     \caption{The forward algorithm.}\label{alg:forward}
     \begin{algorithmic}[1]
@@ -94,9 +106,11 @@ Since the forward algorithm's gradient can be automatically computed by Jax\cite
     \argmin_{\mu} - \log P(y_{1..T} | \mu).
 \end{equation}
 
-\section{Approach}
+\section{Approach}\label{sec:approach}
 
-\section{Experimental Setup}
+We propose an automatic workload generation approach that leverages generative models and their unsupervised learning capabilities. In this approach, only a small set of user actions must be collected to train the model. Once fitted, the model can extrapolate realistic synthetic workloads with high entropy.
+
+\section{Experimental Setup}\label{sec:experimental_setup}
 
 \subsection{Research Questions}
 
@@ -113,13 +127,13 @@ Since the forward algorithm's gradient can be automatically computed by Jax\cite
 
 \subsubsection{Google Borg Trace Version 2}
 
-\section{Results}
+\section{Results}\label{sec:results}
 
 \subsection*{\cref{rq:performance}: How does our approach perform for real workloads?}
 
 \subsection*{\cref{rq:ablation}: How does our approach perform under different settings?}
 
-\section{Discussion}
+\section{Discussion}\label{sec:discussion}
 
 \subsection{Threats to Validity}
 
@@ -131,7 +145,7 @@ Since the forward algorithm's gradient can be automatically computed by Jax\cite
 
 \subsection{Future Work}
 
-\section{Conclusion}
+\section{Conclusion}\label{sec:conclusion}
 
 \printbibliography
 
