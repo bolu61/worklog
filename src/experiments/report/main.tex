@@ -42,23 +42,78 @@ To balance the granularity of the recovered workloads, \cite{Syer2017-ek, Vogele
 
 \subsection{Contributions}
 
-To tackle the challenges above, we propose an extensible model of user behaviors based on Hidden Markov Models (HMM) to allow dynamic generation of workloads, unconstrained by the size of the initial recovered workload. We evaluate our model and demonstrate its performance and generalizability. We also propose directions for future improvements.
+To tackle the challenges above, we propose an extensible model of user behaviors based on a mixture of Hidden Markov Models (HMM) to allow the dynamic generation of workloads unconstrained by the size of the initial recovered workload. We evaluate our model and demonstrate its performance and generalizability. We also propose directions for future improvements.
 
 \subsection{Organization}
 
 We present our model in detail in \cref{sec:modeling_processes} while highlighting challenges in training such a model. We show in \cref{sec:approach} how it can be integrated to generate workloads dynamically. We evaluate it in \cref{sec:experimental_setup,sec:results}, and discuss tradeoffs and potential improvements in \cref{sec:discussion}. Finally, we conclude in \cref{sec:conclusion}.
 
-\section{Modeling Software Processes}\label{sec:modeling_processes}
+\section{Modeling Event Logs}\label{sec:modeling_processes}
 
-\subsection{Markov Chains}
+Event logs and system traces are discrete-time processes. Given time steps \(1, 2, ..., t, ..., \tau - 1, \tau\),  events \(y_t\) are observed according to an underlying process, that is, the control flow of a running software system.
 
-The production of event logs is a stochastic process: each event is an element of a sequence indexed by time. Every time a software produces an event, it must go through a state transition following its control flow. However, Such a process can be modeled with an interleaved hidden Markov model (HMM). It combines a mixture of individual HMM, each modeling a single independent process. In load testing, tasks can be modeled by such a process. We can generate new workloads based on the processes using an interleaved HMM trained on those processes, leading to realistic yet high-variance synthetic workloads.
+\subsection{Control Flow Graph}
+
+The control flow graph (CFG) of a program can be understood as the graphical representation of its state transitions at runtime. Nodes in this graph represent sequences of statements executed sequentially without branching except at the entry and exit statements. Edges represent the control flow and its branching between the basic blocks.
+
+The CFG can also be seen as a description of the underlying process that produces outputs and, for our purposes, event logs and system traces. However, to get a complete picture of the production process, we need to compute the CFG for the whole program, or in other words, the interprocedural CFG (ICFG). Computing this ICFG is resource intensive and impractical and often must be approximated\cite{Zhao2023-nh}.
 
 \subsection{Hidden Markov Chains (HMM)}
 
+\begin{figure}
+    \caption{An example of a graph of the states of a process, with associated state transition probabilities. This graph is analogous to a control flow graph.}
+    \label{fig:state_graph}
+    \vspace{2ex}
+    \begin{tikzpicture}[x=1pt,y=1pt]
+        \node [box,circle] (a) at (135:60) {$a$};
+        \node [box,circle] (b) at (015:60) {$b$};
+        \node [box,circle] (c) at (255:60) {$c$};
+        \draw [->,thick] (a) -- (b) node [midway,fill=white] {$p_\mu(b|a)$};
+        \draw [->,thick] (a) -- (c) node [midway,fill=white] {$p_\mu(c|a)$};
+        \draw [->,thick] (b) -- (c) node [midway,fill=white] {$p_\mu(c|b)$};
+    \end{tikzpicture}
+\end{figure}
+
+Instead of directly approximating an ICFG, we can fit a hidden Markov model (HMM) on a program's output to learn its states and transitions at runtime. The learned graph, where nodes are states and edges are transitions, is an indirect approximation of the ICFG with respect to the output. That is, it models the process that generates the outputs.
+
+A HMM \(\mu = (X, Y)\) consists of two stochastic processes: \(X = \{X_t : 0 \leq t \leq \tau\}\) is a Markov process that is not directly observable, hence hidden, and \(Y = \{Y_t : 0 \leq t \leq \tau\}\) that is directly observed. Each \(X_t\) only depends on the previous \(X_{t-1}\) and each \(Y_t\) only depends on \(X_t\). In the remainder of this paper, we shall use the following shorthand for \(\mu = (X, Y)\): 
+\[p_\mu(x) = P(X = x) \text{ and } p_\mu(x | y) = P(X = x | Y = y).\]
+For simplicity, we assume that \(X\) is ergodic; that is, the probability of getting from every state to every other state is non-zero. This assumption should hold in practice; for load testing, we are concerned with system states that are reoccurring and don't lead to the termination of the system.
+
+At a given discrete time \(t\), suppose the hidden process is at a state \(x_t\). The probability of t
+
+A HMM intuitively models event logs and system traces. The process \(Y\) is the observed events, while the process \(X\) approximates the interprocedural control flow. The state transitions between 
+
+The production of event logs is a stochastic process: each event is an element of a sequence indexed by time. Every time a software produces an event, it must go through a state transition following its control flow. However, Such a process can be modeled with an interleaved hidden Markov model (HMM). It combines a mixture of individual HMM, each modeling a single independent process. In load testing, tasks can be modeled by such a process. We can generate new workloads based on the processes using an interleaved HMM trained on those processes, leading to realistic yet high-variance synthetic workloads.
+
+
 \subsection{Interleaved HMM}
 
-I have implemented an interleaved HMM using the Flax\cite{Heek2023-nl} framework and in this section, I will go over the implementation details and how it is trained.
+\begin{figure}
+    \caption{A diagram representing a HMM. \(y_1, y_2, ..., y_\tau\) are observations; they are emitted with probability \(p_\mu(y_t | x_t)\). \(x_t\) is the hidden state at time \(t\), where the next state is transitioned to with probability \(p_\mu(x_{t+1} | x_t)\)}
+    \label{fig:hmm}
+    \vspace{2ex}
+    \begin{tikzpicture}[x=1pt,y=1pt]
+        \matrix [column sep=10] {
+            \node [box] (e1) {$y_1$}; & \node [box] (e2) {$y_2$}; & \node [box,draw=none] (da) {$\dots$}; & \node [box] (et) {$y_t$}; & \node [box,draw=none] (db) {$\dots$}; & \node [box] (etauprev) {$y_{\tau - 1}$}; & \node [box] (etau) {$y_\tau$}; \\
+        };
+        \node [box,circle,below=25 of et] (st) {$x_t$};
+        \draw [->,thick] (e1) -- (e2);
+        \draw [->,thick] (e2) -- (da);
+        \draw [->,thick] (da) -- (et);
+        \draw [->,thick] (et) -- (db);
+        \draw [->,thick] (db) -- (etauprev);
+        \draw [->,thick] (etauprev) -- (etau);
+        \draw [->,thick] (st) -- (et) node[midway,right] {$p_\mu(y_t | x_t)$};
+        \draw [->,thick] (st) to [loop,looseness=6,out=315,in=225] node[midway,below] {$p_\mu(x_{t+1} | x_t)$} (st);
+    \end{tikzpicture}
+\end{figure}
+
+\section{Approach}\label{sec:approach}
+
+We propose an automatic workload generation approach that leverages generative models and their unsupervised learning capabilities. In this approach, only a small set of user actions must be collected to train the model. Once fitted, the model can extrapolate realistic synthetic workloads with high entropy.
+
+\subsection{Fitting the Model}
 
 Consider a single HMM \(\mu\) with states \(1, 2, ...,n\) in \(S_\mu\). To fit this HMM on a hidden process, we can maximize the likelihood \(\mathcal{L}(\mu | \seq{y_t}_t) = p_\mu(\seq{y_t}_t)\) of \(\mu\) given observations from the hidden process \(\seq{y_t}_t = \seq{y_1, y_2, ..., y_t}\). Since an observation \(y_t\) is only dependant on the current state \(x_t\), we can write this probability like so:
 \begin{equation}\label{eq:likelihood}
@@ -106,11 +161,10 @@ Since the forward algorithm's gradient can be automatically computed by Jax\cite
     \argmin_{\mu} - \log P(y_{1..T} | \mu).
 \end{equation}
 
-\section{Approach}\label{sec:approach}
-
-We propose an automatic workload generation approach that leverages generative models and their unsupervised learning capabilities. In this approach, only a small set of user actions must be collected to train the model. Once fitted, the model can extrapolate realistic synthetic workloads with high entropy.
-
 \section{Experimental Setup}\label{sec:experimental_setup}
+
+We have implemented an interleaved HMM using the Flax\cite{Heek2023-nl} framework.
+
 
 \subsection{Research Questions}
 

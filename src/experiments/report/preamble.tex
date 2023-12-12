@@ -8,7 +8,11 @@
 \usepackage[datamodel=acmdatamodel,style=acmnumeric]{biblatex}
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage{tikz}
 \usepackage{cleveref}
+
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -17,3 +21,15 @@
 \newlist{researchquestions}{enumerate}{1}
 \setlist[researchquestions]{label*=\textbf{RQ\arabic*}, ref=\arabic*}
 \crefname{researchquestionsi}{RQ}{RQs}
+
+\tikzset{
+    box/.style={
+        rectangle,
+        draw,
+        thick,
+        minimum size=24pt,
+        rounded corners=4pt,
+        fill=white,
+    },
+    arr/.tip={Latex[round]}
+}
