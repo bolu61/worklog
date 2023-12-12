@@ -1,22 +1,29 @@
-% !TeX root = main.tex
+%!TeX root = main.tex
 \documentclass[nonacm,sigplan,natbib=false]{acmart}
 \usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{cleveref}
 \usepackage[datamodel=acmdatamodel,style=acmnumeric]{biblatex}
-\usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{tikz}
+\usepackage{varioref}
+\usepackage{hyperref}
 \usepackage{cleveref}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
 
+\providecommand{\giv}{\:\vert\:}
+
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclarePairedDelimiter{\seq}{\langle}{\rangle}
+\DeclarePairedDelimiterX{\pan}[1]{(}{)}{\renewcommand{\giv}{\:\delimsize\vert\:}#1}
+\DeclarePairedDelimiter{\lis}{[}{]}
+\DeclarePairedDelimiterX{\set}[1]{\{}{\}}{\renewcommand{\giv}{\:\delimsize\vert\:}#1}
+
+\DeclareMathOperator{\prob}{\mathbb{P}}
 
 \newlist{researchquestions}{enumerate}{1}
 \setlist[researchquestions]{label*=\textbf{RQ\arabic*}, ref=\arabic*}
@@ -27,7 +34,6 @@
         rectangle,
         draw,
         thick,
-        minimum size=24pt,
         rounded corners=4pt,
         fill=white,
     },
