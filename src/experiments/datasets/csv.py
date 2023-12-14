@@ -20,11 +20,3 @@ def masked_csv_dataset(key, path, size, length):
 
     return dataset(data=cast(Sequence[jax.Array], data))
 
-
-# %%
-ds = masked_csv_dataset(
-    jax.random.key(0),
-    "/mnt/c/Users/anana5/OneDrive/Desktop/apache_james_load.csv",
-    10_000,
-    10,
-)

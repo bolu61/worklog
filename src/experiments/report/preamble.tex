@@ -3,13 +3,18 @@
 \usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \usepackage[datamodel=acmdatamodel,style=acmnumeric]{biblatex}
 \usepackage{mathtools}
 \usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{subcaption}
 \usepackage{varioref}
 \usepackage{hyperref}
 \usepackage{cleveref}
+
+\pagestyle{plain}
+\settopmatter{printfolios=true}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
@@ -26,7 +31,7 @@
 \DeclareMathOperator{\prob}{\mathbb{P}}
 
 \newlist{researchquestions}{enumerate}{1}
-\setlist[researchquestions]{label*=\textbf{RQ\arabic*}, ref=\arabic*}
+\setlist[researchquestions]{label*=\textbf{RQ~\arabic*}, ref=\arabic*}
 \crefname{researchquestionsi}{RQ}{RQs}
 
 \tikzset{
@@ -39,3 +44,6 @@
     },
     arr/.tip={Latex[round]}
 }
+
+\newcommand{\worklogalpha}{$\textsc{WorkLog}_\alpha$}
+\newcommand{\worklogbeta}{$\textsc{WorkLog}_\beta$}

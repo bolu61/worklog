@@ -1,3 +1,4 @@
+
 # %%
 import sys
 from functools import partial
@@ -34,37 +35,13 @@ datasets = {
         ),
         4,
     ),
-    "wide": (
-        masked_process_dataset(
-            key=key,
-            size=SAMPLE_SIZE,
-            interleaving=16,
-            states=4,
-            alphabet=4,
-            shape=1,
-            length=10,
-        ),
-        4,
-    ),
-    "hard": (
-        masked_process_dataset(
-            key=key,
-            size=SAMPLE_SIZE,
-            interleaving=4,
-            states=16,
-            alphabet=16,
-            shape=1,
-            length=10,
-        ),
-        4,
-    ),
 }
 
 models = {
-    "base": lambda action_count: WorkLogAlpha(1, 1, action_count, lr=1e-2),
-    "alpha": lambda action_count: WorkLogAlpha(4, 4, action_count, lr=1e-2),
-    "beta_wide": lambda action_count: WorkLogBeta(16, 4, action_count, lr=1),
-    "beta_large": lambda action_count: WorkLogBeta(4, 16, action_count, lr=1),
+    4: lambda action_count: WorkLogBeta(4, 4, action_count, lr=1e-1),
+    8: lambda action_count: WorkLogBeta(8, 4, action_count, lr=1),
+    16: lambda action_count: WorkLogBeta(16, 4, action_count, lr=1),
+    32: lambda action_count: WorkLogBeta(32, 4, action_count, lr=1),
 }
 
 
