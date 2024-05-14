@@ -9,7 +9,7 @@
 \begin{document}
 
 \begin{abstract}
-% todo
+    As software systems become more complex and deployed on increasingly diverse platforms, the need for load testing and quality workloads is also increased. Load testing is required to ensure the proper functioning of a software system under a realistic environment and can find potential issues that functional tests cannot find. In order for load testing to be effective, one needs to input a realistic workload. Collecting user inputs is costly and complex. Thus, many research works propose automatic workload reproduction approaches. However, many of those approaches do not consider noise and the ability to extrapolate novel action sequences. We propose to use an interleaved HMM to learn the user behavior through event logs, which are then used to generate action sequences. We describe in detail the formulation of the approach and techniques used. We implement two variants of our approach, \worklogalpha{} and \worklogbeta{}. We show through an extensive evaluation that our approach can generate realistic yet diverse workloads while also being customizable to the use case.
 \end{abstract}
 
 \maketitle
@@ -262,7 +262,11 @@ Once the model has been trained, we can use it to generate workloads one action 
 \section{Experimental Setup}\label{sec:experimental_setup}
 
 We have implemented the interleaved HMM using the Flax\cite{Heek2023-nl} framework based on Jax\cite{Bradbury2018-jz}. To achieve better numerical stability, \cref{alg:forward,alg:generate} are implemented in log space.
-We evaluate two variants of our approach. With the first variant, which we call \worklogalpha, we train an interleaved HMM directly using \cref{alg:forward}. The number of subchains and states it can have is thus minimal. As an alternative, with the second variant, we train each constituent chains separately using \cref{alg:forward}. Although computationally more efficient, it is the worst approximation.
+We evaluate two variants of our approach.
+
+With the first variant, which we call \worklogalpha{}, we train an interleaved HMM directly using \cref{alg:forward}. The number of subchains and states it are both limited to 4 to reduce computation overhead.
+
+Alternatively, with the second variant, \worklogbeta{}, we train each constituent chains separately using \cref{alg:forward}. Although computationally more efficient, it is the worst approximation.
 
 \subsection{Research Questions}
 
@@ -271,17 +275,32 @@ We evaluate two variants of our approach. With the first variant, which we call 
     \item\label{rq:ablation} \emph{How does the approach perform under different settings?} Due to the many tunable parameters and workload characteristics, that is, the number of constituent chains in the interleaved HMM, the number of states in each chain, the number of actions, and the training batch sizes, it is important to know which configuration yields better results.
 \end{researchquestions}
 
-To answer these research questions, we use two metrics: cliff's delta\cite{Cliff1993-he} of the actual \emph{throughput} versus generated throughput, defined as
+\subsection{Evaluation Metrics}
+
+We use two different metrics to evaluate the realism and randomness of each variant of our approach.
+
+\subsubsection{Throughput Delta}
+
+The first metric is Cliff's delta\cite{Cohen2013-up,Cliff1993-he} of the \emph{throughput} of the actual action sequence against that of generated action sequences. We define throughput as
 \begin{equation}
     \prob\pan{\seq{Y_t = y}_{t=1}^\tau}
 \end{equation}
-for a specific action \(y\), and \emph{perplexity} defined as, in the case of generative models,
+for a specific action \(y\). Following suggestions from \cite{Sawilowsky2009-oy}, we use the following interpretation of Cliff's delta:
+\(\approx 0.01\) indicates a very small difference, \(\approx 0.2\) is small, \(\approx 0.5\) is medium, \(\approx 0.8\) is large, \(\approx 1.2\) is very large and \(\approx 2\) is huge.
+
+\subsubsection{Perplexity}
+
+Using the negative log-likelihood as a cross-entropy, we define \emph{perplexity} as
 \begin{equation}
     \prob\pan{\seq{Y_t = y_t}_{t=0}^{\tau}}^{-\frac{1}{\tau}}
 \end{equation}
-for a sequence of observation \(\seq{y_t}_{t=0}^\tau\).
+for a sequence of observation \(\seq{y_t}_{t=0}^\tau\). Because the interpretation of this metric is relative to the model, we only use this metric to compare a model against variants of itself. Usually, for example, with language models, perplexity can be interpreted as the model's randomness and confusion. However, we adapt this metric to measure the randomness of the generated workloads. Thus, higher is better.
 
 \subsection{Datasets}\label{sec:dataset}
+
+We use both datasets from real software projects and synthetically generated datasets.
+
+\subsubsection{Real Datasets}
 
 To answer \cref{rq:performance}, we use datasets taken from \cite{Chen2019-fu}. They consist of data from two open-source projects, Apache James and OpenMRS, and one industrial project, Google Borg.
 
@@ -289,7 +308,9 @@ Apache James is an enterprise mail server. \cite{Chen2019-fu} used JMeter to gen
 
 OpenMRS is a web medical record service. \cite{Chen2019-fu} used the default demo database with over 5000 patients and 476,000 user actions. Four action types are considered: ``ADD'', ``DELETE'', ``SEARCH'' and ``EDIT''. They used JMeter and injected more randomness to simulate a more realistic workload.
 
-To answer \cref{rq:ablation}, we use a synthetic dataset, which we generate using a hardcoded interleaved HMM. The parameters of the HMM used to generate the dataset are not shared with the HMM under evaluation. Since the model is stochastic, it will not learn the same parameters as the HMM used to generate the dataset. By varying the parameters of the hardcoded HMM, we can obtain synthetic datasets with different characteristics.
+\subsubsection{Synthetic Datasets}
+
+To answer \cref{rq:ablation}, we use a synthetic dataset, which we generate using a hardcoded interleaved HMM. The parameters of the HMM used to generate the dataset are not shared with the HMM under evaluation. Since the model is stochastic, it will not learn the same parameters as the HMM used to generate the dataset. By varying the parameters of the hardcoded HMM, we can obtain synthetic datasets with different characteristics, which we leverage to reveal insights about the variants of our approach.
 
 In our experimentation, we use a small sample of approximately 1000 actions for each dataset. 90\% of each dataset is used to train the model, while 10\% is used for evaluation. That is, our model is evaluated on unseen data.
 
@@ -297,8 +318,8 @@ In our experimentation, we use a small sample of approximately 1000 actions for 
 
 \subsection*{\cref{rq:performance}: How does our approach perform for real workloads?}
 
-\begin{table}[]
-\caption{Throughput delta on the Apache James dataset.}
+\begin{table}
+\caption{Throughput delta on the Apache James dataset.}\label{tab:throughput_apache_james}
 \begin{tabular}{@{}l|l|lll@{}}
 \toprule
 \multicolumn{4}{c}{Apache James}                         \\ \midrule
@@ -309,8 +330,8 @@ Mean    & 5.000      & \textbf{0.0322} & 0.0835          \\ \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{table}[]
-\caption{Throughput delta on the OpenMRS dataset.}
+\begin{table}
+\caption{Throughput delta on the OpenMRS dataset.}\label{tab:throughput_openmrs}
 \begin{tabular}{@{}l|l|lll@{}}
 \toprule
 \multicolumn{4}{c}{OpenMRS}                         \\ \midrule
@@ -323,8 +344,8 @@ Mean   & 2.500      & \textbf{0.0220} & 0.0365          \\ \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{table}[]
-\caption{Cliff's delta of the throughput of the generated workload against the original workload of the Google Borg dataset. Throughput is the original throughput.}
+\begin{table}
+\caption{Throughput delta on the Google Borg dataset.}\label{tab:throughput_google_borg}
 \begin{tabular}{@{}l|l|ll@{}}
 \toprule
 \multicolumn{4}{c}{Google Borg}                         \\ \midrule
@@ -339,12 +360,22 @@ Mean     & 1.667      & \textbf{0.0576} & 0.1228          \\ \bottomrule
 \end{tabular}
 \end{table}
 
-To answer this question, we evaluated \worklogalpha{} and \worklogbeta{} against Apache James, OpenMRS, and Google Borg datasets. For each dataset, we train a new interleaved HMM.
+To answer this question, we evaluated \worklogalpha{} and \worklogbeta{} against Apache James, OpenMRS, and Google Borg datasets. For each dataset, we train a new interleaved HMM, each configured with the correct number of action types. Then, we generate a matching amount of sequences. Finally, for each action type, we compute the Cliff's delta of the throughput of sequences from the original dataset against the throughput of generated sequences.
+
+We present the results in \cref{tab:throughput_apache_james,tab:throughput_openmrs,tab:throughput_google_borg}. Overall, \worklogalpha{} seems to perform better than \worklogbeta{}. This is expected due to the fact that \worklogbeta{} uses an approximation of \cref{alg:forward} during training. However, we note that \worklogbeta{} is an order of magnitude faster to train. 
+
+Both \worklogalpha{} and \worklogbeta{} perform well on the Apache James dataset, with very small deltas and with \worklogalpha{} performing slightly better than \worklogbeta{}. Coincidentally, the models have a constant delta for both types of actions, potentially indicating that both models learned as many user behavior patterns as their randomness would allow.
+
+On the OpenMRS dataset, the difference in throughput delta between the two variants starts to blur. For the ``ADD'' and ``SEARCH'' action types, \worklogalpha{} performs slightly better, whereas for the ``DELETE'' and ``EXIT'' action types, \worklogbeta{} is better.
+
+This is because users behave differently for different actions, and \worklogbeta{} learns some patterns faster. In \cref{tab:throughput_google_borg} is where we see \worklogbeta{} starts to struggle. \worklogalpha{} performs better for all action types except for ``SUBMIT'' and ``KILL''. On this dataset, \worklogbeta{} has a larger but still small delta.
+
+\emph{Finding 1: Overall, both variants can reproduce realistic workloads. \worklogalpha{} performs slightly better on larger datasets.}
 
 \subsection*{\cref{rq:ablation}: How does our approach perform under different settings?}
 
 \begin{table}
-\caption{Performance of \worklogalpha{} and \worklogbeta{} on synthetic datasets.}
+\caption{Performance of \worklogalpha{} and \worklogbeta{} on synthetic datasets. ``Delta'' is the Cliff's delta of the throughput.}\label{tab:ablation_dataset}
 \begin{tabular}{@{}l|ll|ll@{}}
 \toprule
      & \multicolumn{2}{c|}{\worklogalpha} & \multicolumn{2}{c}{\worklogbeta} \\ \midrule
@@ -355,8 +386,16 @@ Hard & 0.7370          & 4.1623          & \textbf{0.7364} & \textbf{16.123} \\ 
 \end{tabular}
 \end{table}
 
+To answer this question, we first evaluate both \worklogalpha{} and \worklogbeta{} on three different configurations of our synthetic dataset. We train a new model for each dataset instance and measure both the throughput delta and the perplexity.
+
+The easy dataset is generated by an interleaved HMM with 4 constituent chains of 4 states each. The wide dataset is generated by an interleaved HMM with 16 constituent chains of 4 states each. The hard dataset is generated by an interleaved HMM with 4 constituent chains of 16 states each.
+
+The results are recorded in \cref{tab:ablation_dataset}. We can observe that both variants produce sequences that are more realistic, e.g., have a smaller throughput delta, on datasets with a smaller number of underlying states. They struggle to reproduce the hard dataset, which has a higher number of underlying states. The number of constituent chains seems to not have an influence on the performance of \worklogalpha{}, as indicated by the wide dataset. We also note that, overall, \worklogbeta{} has higher perplexity, indicating more randomness.
+
+\emph{Finding 2: Both variants struggle when the number of underlying states are increased. \worklogbeta{} can produce more random sequences.}
+
 \begin{figure}
-    \caption{Performance of \worklogalpha{} versus number of constituent chains.}
+    \caption{Performance of \worklogbeta{} versus number of constituent chains.}\label{fig:ablation_wide}
     \centering
     \begin{subfigure}{.5\columnwidth}
         \caption{throughput delta}
@@ -371,7 +410,7 @@ Hard & 0.7370          & 4.1623          & \textbf{0.7364} & \textbf{16.123} \\ 
 \end{figure}
 
 \begin{figure}
-    \caption{Performance of \worklogalpha{} versus number of states of each constituent chains.}
+    \caption{Performance of \worklogbeta{} versus number of states of each constituent chain.}\label{fig:ablation_size}
     \centering
     \begin{subfigure}{.5\columnwidth}
         \caption{throughput delta}
@@ -385,19 +424,26 @@ Hard & 0.7370          & 4.1623          & \textbf{0.7364} & \textbf{16.123} \\ 
     \end{subfigure}
 \end{figure}
 
+Since \worklogbeta{} is more flexible regarding tunable parameters, we evaluate the influence of each. We investigate the effect of changing the number of constituent chains shown in \cref{fig:ablation_wide} and the number of states in each constituent chain shown in \cref{fig:ablation_size}.
+
+We can observe that varying the number of constituent chains does not significantly affect the throughput delta. However, perplexity increases. Conversely, we observe that as the number of states increases, the throughput delta also increases, but the perplexity stays constant. This confirms \cite{Cohen2005-mn}'s findings that using a more precise user behavior model is better.
+
+\emph{Finding 3: Increasing the number of constituent chains increases perplexity and increasing the number of states increases throughput delta of \worklogbeta{}. We recommend using more chains with less states.}
+
 \section{Discussion}\label{sec:discussion}
 
-\subsection{Threats to Validity}
+From our evaluation results presented in \cref{sec:results}, we can conclude that our approach can produce realistic workloads while also adding significant bits of randomness.
 
-\subsubsection{Internal Validity}
-
-\subsubsection{External Validity}
-
-\subsubsection{Construct Validity}
+We also note that our approach is highly customizable in that its performance can be influenced by the amount of training, the different configurations and the complexity of the user behavior it is modeling. We suggest that when the situation allows, one should use \worklogalpha{}, and when user behavior is more complex, one should use \worklogbeta{} and tune it to their needs.
 
 \subsection{Future Work}
 
+We note that a HMM is a generative model. In light of recent developments in machine learning and language models, generative models become more sophisticated and can model more complex data. It will be interesting to see how we can instead leverage state-of-the-art generative models, replacing HMMs.
+For example, one can use an LSTM to approximate the hidden states of the interleaved HMM. This way, more complex state representations can be learned and potentially achieve better performance.
+
 \section{Conclusion}\label{sec:conclusion}
+
+Following the works of \cite{Yadwadkar2010-ml,Minot2014-gn,Chen2019-fu}, we have developed an approach to generate workloads by training an interleaved HMM on small samples of event logs. After an extensive evaluation of two different variants of our approach, \worklogalpha{} and \worklogbeta{}, we have found that both variants can generate realistic logs, and depending on the situation, one can adapt our approach to achieve better performance. We highlight the possibility of extending our approach by leveraging state-of-the-art generative models.
 
 \printbibliography
 
