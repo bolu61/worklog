@@ -1,0 +1,49 @@
+%!TeX root = main.tex
+\documentclass[nonacm,sigplan,natbib=false]{acmart}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[datamodel=acmdatamodel,style=acmnumeric]{biblatex}
+\usepackage{mathtools}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{varioref}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\pagestyle{plain}
+\settopmatter{printfolios=true}
+
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+
+\providecommand{\giv}{\:\vert\:}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclarePairedDelimiter{\seq}{\langle}{\rangle}
+\DeclarePairedDelimiterX{\pan}[1]{(}{)}{\renewcommand{\giv}{\:\delimsize\vert\:}#1}
+\DeclarePairedDelimiter{\lis}{[}{]}
+\DeclarePairedDelimiterX{\set}[1]{\{}{\}}{\renewcommand{\giv}{\:\delimsize\vert\:}#1}
+
+\DeclareMathOperator{\prob}{\mathbb{P}}
+
+\newlist{researchquestions}{enumerate}{1}
+\setlist[researchquestions]{label*=\textbf{RQ~\arabic*}, ref=\arabic*}
+\crefname{researchquestionsi}{RQ}{RQs}
+
+\tikzset{
+    box/.style={
+        rectangle,
+        draw,
+        thick,
+        rounded corners=4pt,
+        fill=white,
+    },
+    arr/.tip={Latex[round]}
+}
+
+\newcommand{\worklogalpha}{$\textsc{WorkLog}_\alpha$}
+\newcommand{\worklogbeta}{$\textsc{WorkLog}_\beta$}
