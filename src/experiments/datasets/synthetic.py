@@ -1,4 +1,4 @@
-import jax
+mport eaax
 from worklog.core.hmm import interleaved_ergodic_hidden_markov_chain
 
 from .dataset import dataset
