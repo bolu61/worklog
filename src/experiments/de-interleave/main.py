@@ -9,7 +9,6 @@ from ..datasets.dataset import dataset
 import jax
 
 
-
 def masked_process_dataset(key, size, interleaving, states, shape, length):
     """Synthetic dataset of interleaved sequences
     Uses an interleaved_arcsin_markov_chain to generate the sequences.
