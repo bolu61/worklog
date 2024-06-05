@@ -1,9 +1,49 @@
 from collections import defaultdict
-from collections.abc import Sequence
+from collections.abc import Iterable, Iterator
 
-from .trie import trie
+from .database import Database
 
-type Database[T] = Sequence[Sequence[T]]
+
+class DictTrie[K]:
+    _children: dict[K, "DictTrie[K]"]
+    _count: int
+
+    def __init__(self, count: int):
+        self._children = dict()
+        self._count = count
+
+    @property
+    def count(self):
+        return self._count
+
+    def find(self, str: Iterable[K]) -> "DictTrie[K]":
+        def _find(t: DictTrie[K], it: Iterator[K]):
+            while True:
+                try:
+                    k = next(it)
+                except StopIteration:
+                    return t
+                t = t._children[k]
+
+        return _find(self, iter(str))
+
+    def insert(self, key, t: "DictTrie[K]"):
+        self._children[key] = t
+
+    def __str__(self) -> str:
+        return (
+            "("
+            + ",".join((str(k) + str(t) for k, t in self._children.items()))
+            + "):"
+            + str(self._count)
+        )
+
+    def subtrie(self, key: K) -> "DictTrie[K]":
+        return self._children[key]
+
+    def probability(self, key: K) -> float:
+        raise NotImplementedError()
+
 
 
 def project[T](db: Database[T], s: T) -> Database[T]:
@@ -15,8 +55,8 @@ def project[T](db: Database[T], s: T) -> Database[T]:
     return p
 
 
-def prefixspan[T](db: Database[T], minsup: int) -> trie[T, int]:
-    t = trie[T, int](len(db))
+def prefixspan[T](db: Database[T], minsup: int) -> DictTrie[T]:
+    t = DictTrie[T](len(db))
 
     count = defaultdict[T, int](lambda: 0)
     for seq in db:
@@ -38,4 +78,4 @@ if __name__ == "__main__":
     t = prefixspan(db, 3)
 
     print(t)
-    print(t.find([2, 3]).get())
+    print(t.find([2, 3])._count)
