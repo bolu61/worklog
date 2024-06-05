@@ -72,57 +72,6 @@ class InterleavedHiddenMarkovChain(nn.Module):
             jax.random.split(key, len(p)), p
         )
 
-    def sforward(self, ys):
-        # dim names: (choice, state, state) or (choice, state, alphabet)
-        choice = jax.nn.log_softmax(self.choice)
-        transition = jax.nn.log_softmax(self.transition, axis=-1)
-        emission = jax.nn.log_softmax(self.emission, axis=-1)
-        alpha = jax.nn.log_softmax(self.prior, axis=-1)
-
-        for y in ys:
-            alpha = (
-                emission[:, :, y]
-                + choice[:, None]
-                + nn.logsumexp(transition + alpha[:, :, None], axis=1)
-            )
-
-        return jnp.mean(nn.logsumexp(alpha, axis=1))
-
-    def forward(self, ys):
-        # dim names: (choice, state, state) or (choice, state, alphabet)
-        choice = jax.nn.log_softmax(self.choice)
-        transition = jax.nn.log_softmax(self.transition, axis=-1)
-        emission = jax.nn.log_softmax(self.emission, axis=-1)
-        prior = jax.nn.log_softmax(self.prior, axis=-1)
-        index = cprod(
-            *[jnp.arange(self.states)] * self.interleaving,
-            jnp.arange(self.interleaving),
-        )
-
-        def a(x, x_new, alpha):
-            s, s_new, i = x[:-1], x_new[:-1], x_new[-1]
-            return (
-                alpha
-                + choice[i]
-                + jnp.sum(jnp.log(s == s_new).at[i].set(transition[i, s[i], s_new[i]]))
-            )
-
-        def b(x, y):
-            s, c = x[:-1], x[-1]
-            return emission[c, s[c], y]
-
-        alpha = jnp.sum(cprod(*prior, choice), -1)
-
-        for y in ys:
-            alpha = jax.vmap(
-                lambda x_new: b(x_new, y)
-                + jax.nn.logsumexp(
-                    jax.vmap(a, in_axes=(0, None, 0))(index, x_new, alpha)
-                )
-            )(index)
-
-        return jax.nn.logsumexp(alpha)
-
 
 def interleaved_ergodic_hidden_markov_chain(
     interleaving: int, states: int, alphabet: Optional[int], shape=1

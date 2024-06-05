@@ -1,12 +1,10 @@
-from worklog.core.hmm import interleaved_ergodic_hidden_markov_chain
-from prefixspan import prefixspan
-from functools import partial
-from itertools import islice
 from array import array
 
-from ..datasets.dataset import dataset
-
 import jax
+from prefixspan import prefixspan
+from worklog.core.hmm import interleaved_ergodic_hidden_markov_chain
+
+from ..datasets.dataset import dataset
 
 
 def masked_process_dataset(key, size, interleaving, states, shape, length):
@@ -46,7 +44,7 @@ def propagate(trie: prefixspan, sequence):
 
         if not i < len(sequence):
             return 0
-            
+
         if (a := rec(t[sequence[i]], i + 1)) > (b := rec(t, i + 1)):
             print("a")
             mask[i] = True
@@ -61,17 +59,12 @@ def propagate(trie: prefixspan, sequence):
     return mask
 
 
-key = jax.random.key(0xc0ffee)
+key = jax.random.key(0xC0FFEE)
 
 key, key_1 = jax.random.split(key)
 
 ds = masked_process_dataset(
-    key=key,
-    size=1000,
-    interleaving=3,
-    states=16,
-    shape=1,
-    length=16
+    key=key, size=1000, interleaving=3, states=16, shape=1, length=16
 )
 ds = ds.map(lambda s: array("L", s))
 
@@ -80,4 +73,3 @@ trie = prefixspan(train_ds, 8)
 
 print(test_ds[0])
 print(propagate(trie, test_ds[0]))
-

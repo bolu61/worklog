@@ -5,6 +5,7 @@ from typing import Sequence, cast
 
 import jax
 import jax.numpy as jnp
+
 from experiments.datasets.dataset import dataset
 
 
@@ -19,4 +20,3 @@ def masked_csv_dataset(key, path, size, length):
     data = jax.random.choice(key, data, (size,), replace=False, axis=0)
 
     return dataset(data=cast(Sequence[jax.Array], data))
-
