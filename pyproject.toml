@@ -28,4 +28,10 @@ Source = "https://github.com/unknown/worklog"
 source = "vcs"
 
 [tool.hatch.build]
-only-include = ["src/deepspan"]
+packages = ["src/deepspan"]
+
+[tool.hatch.envs.experiments]
+dependencies = [
+  "pandas",
+  "tqdm"
+]

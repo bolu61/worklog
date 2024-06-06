@@ -1,5 +1,5 @@
 from collections import defaultdict
-from collections.abc import Iterable, Iterator
+from collections.abc import Generator, Iterator, Sequence
 
 from .database import Database
 
@@ -16,7 +16,7 @@ class DictTrie[K]:
     def count(self):
         return self._count
 
-    def find(self, str: Iterable[K]) -> "DictTrie[K]":
+    def find(self, seq: Sequence[K]) -> "DictTrie[K]":
         def _find(t: DictTrie[K], it: Iterator[K]):
             while True:
                 try:
@@ -25,7 +25,7 @@ class DictTrie[K]:
                     return t
                 t = t._children[k]
 
-        return _find(self, iter(str))
+        return _find(self, iter(seq))
 
     def insert(self, key, t: "DictTrie[K]"):
         self._children[key] = t
@@ -38,44 +38,48 @@ class DictTrie[K]:
             + str(self._count)
         )
 
-    def subtrie(self, key: K) -> "DictTrie[K]":
+    def __getitem__(self, key: K) -> "DictTrie[K]":
         return self._children[key]
 
-    def probability(self, key: K) -> float:
-        raise NotImplementedError()
+    def __contains__(self, key: K) -> bool:
+        return key in self._children
 
 
+type Index = list[tuple[int, int]]
 
-def project[T](db: Database[T], s: T) -> Database[T]:
-    p: Database[T] = []
-    for seq in db:
-        for t in (iter_seq := iter(seq)):
-            if t == s:
-                p.append([*iter_seq])
-    return p
+
+def project[
+    T
+](db: Database[T], index: Index, s: T) -> Generator[tuple[int, int], None, None]:
+    for i, j in index:
+        try:
+            yield i, db[i].index(s, j) + 1
+        except ValueError:
+            continue
 
 
 def prefixspan[T](db: Database[T], minsup: int) -> DictTrie[T]:
-    t = DictTrie[T](len(db))
+    def rec(index: Index):
+        t = DictTrie[T](len(index))
+        count = defaultdict[T, int](lambda: 0)
+        for i, j in index:
+            for s in set(db[i][j:]):
+                count[s] += 1
 
-    count = defaultdict[T, int](lambda: 0)
-    for seq in db:
-        for s in set(seq):
-            count[s] += 1
+        for s, c in count.items():
+            if c < minsup:
+                continue
+            t.insert(s, rec([*project(db, index, s)]))
 
-    for s, c in count.items():
-        if c < minsup:
-            continue
-        proj: Database[T] = project(db, s)
-        t.insert(s, prefixspan(proj, minsup))
+        return t
 
-    return t
+    return rec([(i, 0) for i in range(len(db))])
 
 
 if __name__ == "__main__":
-    db = [[1, 2, 3], [2, 3, 1], [2, 2, 3], [2, 2, 2]]
+    db = ["abc", "bca", "bac", "bab"]
 
     t = prefixspan(db, 3)
 
     print(t)
-    print(t.find([2, 3])._count)
+    print(t.find("bc")._count)

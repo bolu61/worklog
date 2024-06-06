@@ -5,7 +5,6 @@ from typing import Sequence, cast
 
 import jax
 import jax.numpy as jnp
-
 from experiments.datasets.dataset import dataset
 
 
