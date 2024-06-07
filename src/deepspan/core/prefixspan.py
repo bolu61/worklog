@@ -44,6 +44,13 @@ class DictTrie[K]:
     def __contains__(self, key: K) -> bool:
         return key in self._children
 
+    def prob(self, key: K) -> float:
+        return self._children[key]._count / self._count
+
+    @property
+    def keys(self) -> list[K]:
+        return sorted(self._children.keys(), reverse=True, key=lambda k: self._children[k]._count)
+
 
 type Index = list[tuple[int, int]]
 
@@ -74,12 +81,3 @@ def prefixspan[T](db: Database[T], minsup: int) -> DictTrie[T]:
         return t
 
     return rec([(i, 0) for i in range(len(db))])
-
-
-if __name__ == "__main__":
-    db = ["abc", "bca", "bac", "bab"]
-
-    t = prefixspan(db, 3)
-
-    print(t)
-    print(t.find("bc")._count)
